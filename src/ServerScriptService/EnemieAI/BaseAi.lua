@@ -13,17 +13,30 @@ local HEALTH = 100
 local ATTACK_RANGE = 2
 local ATTACK_COOLDOWN = 1
 
+-- Modules
+local enemyTypes = require(ServerScriptService.EnemieAI:FindFirstChild("enemyTypes")) 
 
-function BaseEnemie.Active(enemy)
+function BaseEnemie.Active(enemy, enemyType)
     
+    local config = enemyTypes[enemyType] or enemyTypes.Chase
+
     local lastAttackTime = 0
     local isAlive = true
-    
+
     local humanoid = enemy:FindFirstChild("Humanoid")
     local rootPart = enemy:FindFirstChild("HumanoidRootPart")
 
+    local CHASE_RANGE = config.chaseRange
+    local DAMAGE = config.damage
+    local ATTACK_RANGE = config.attackRange
+    local ATTACK_COOLDOWN = config.attackCooldown
+    local SPEED = config.speed
+    local HEALTH = config.health
+
     humanoid.WalkSpeed = SPEED
+    humanoid.MaxHealth = HEALTH
     humanoid.Health = HEALTH
+
     
     -- Modules
     local playerStatsModule = require(ServerScriptService:WaitForChild("plrDataModule"))
