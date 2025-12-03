@@ -18,6 +18,7 @@ while true do
 	
 	while EnemyCount >= maxCount do
 		task.wait(0.1) -- wait a short time before checking again
+		EnemyCount = #workspace.Enemies:GetChildren()
 	end
 	-- Random number of mobs in this pack
 	local packSize = math.random(minPackSize, maxPackSize)

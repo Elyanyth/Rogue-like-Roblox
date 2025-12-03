@@ -19,7 +19,7 @@ local plrLootData = {}
 
 SelectionEvent.OnServerEvent:Connect(function(Player, Selection)
 	
-	print("Recived Selection")
+	-- print("Recived Selection")
 	
 	plrLootData = LootModule.GetPlayerLoot(Player) 
 	
