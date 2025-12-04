@@ -14,11 +14,14 @@ local ATTACK_RANGE = 2
 local ATTACK_COOLDOWN = 1
 
 -- Modules
-local enemyTypes = require(ServerScriptService.EnemieAI:FindFirstChild("enemyTypes")) 
+local enemyTypes = require(ServerScriptService.EnemieAI:WaitForChild("enemyTypes")) 
 
 function BaseEnemie.Active(enemy, enemyType)
     
-    local config = enemyTypes[enemyType] or enemyTypes.Chase
+    -- print(enemy)
+    -- print(enemyType)
+
+    local config = enemyType or enemyTypes.Chase
 
     local lastAttackTime = 0
     local isAlive = true
@@ -40,7 +43,8 @@ function BaseEnemie.Active(enemy, enemyType)
     
     -- Modules
     local playerStatsModule = require(ServerScriptService:WaitForChild("plrDataModule"))
-    
+    local genericFunctions = require(ServerScriptService.GenericFunctions)
+
     -- Tag this enemy
     CollectionService:AddTag(enemy, "Enemy")
     
@@ -49,21 +53,21 @@ function BaseEnemie.Active(enemy, enemyType)
         return Players:GetPlayerFromCharacter(character) ~= nil
     end
     
-    local function getClosestPlayer()
-        local closestPlayer = nil
-        local closestDist = CHASE_RANGE + 1
+    -- local function getClosestPlayer()
+    --     local closestPlayer = nil
+    --     local closestDist = CHASE_RANGE + 1
     
-        for _, player in ipairs(Players:GetPlayers()) do
-            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                local dist = (player.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
-                if dist <= CHASE_RANGE and dist < closestDist then
-                    closestDist = dist
-                    closestPlayer = player
-                end
-            end
-        end
-        return closestPlayer
-    end
+    --     for _, player in ipairs(Players:GetPlayers()) do
+    --         if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+    --             local dist = (player.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
+    --             if dist <= CHASE_RANGE and dist < closestDist then
+    --                 closestDist = dist
+    --                 closestPlayer = player
+    --             end
+    --         end
+    --     end
+    --     return closestPlayer
+    -- end
     
     local function tryAttackPlayer(targetCharacter)
         if not isAlive then return end
@@ -98,7 +102,7 @@ function BaseEnemie.Active(enemy, enemyType)
     RunService.Heartbeat:Connect(function(dt)
         if not isAlive then return end
         
-        local targetPlayer = getClosestPlayer()
+        local targetPlayer = genericFunctions.getClosestPlayer(enemy)
         if not targetPlayer or not targetPlayer.Character then return end
 
         local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")

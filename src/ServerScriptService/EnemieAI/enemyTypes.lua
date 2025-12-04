@@ -10,7 +10,10 @@ enemyTypes.Chase = {
     health = 100,
     attackRange = 2,
     attackCooldown = 1,
-    model = enemyModels:WaitForChild("Chase") 
+    model = enemyModels:WaitForChild("Chase"),    
+    minPackSize = 2,
+    maxPackSize = 4,
+    spawnType = "Spread"
 
 }
 
@@ -21,7 +24,10 @@ enemyTypes.Swarm = {
     health = 50,
     attackRange = 2,
     attackCooldown = 1,
-    model = enemyModels:WaitForChild("Swarm") 
+    model = enemyModels:WaitForChild("Swarm"),
+    minPackSize = 4,
+    maxPackSize = 8,
+    spawnType = "Swarm"
 }
 
 enemyTypes.Tank = {
@@ -31,7 +37,10 @@ enemyTypes.Tank = {
     health = 300,
     attackRange = 2,
     attackCooldown = 1,
-    model = enemyModels:WaitForChild("Tank") 
+    model = enemyModels:WaitForChild("Tank"),
+    minPackSize = 1,
+    maxPackSize = 2,
+    spawnType = "Spread"
 }
 
 function enemyTypes.getWeightedRandomType()
@@ -52,7 +61,7 @@ function enemyTypes.getWeightedRandomType()
     for _, entry in ipairs(weightedTypes) do
         currentWeight = currentWeight + entry.weight
         if random <= currentWeight then
-            return entry.type
+            return enemyTypes[entry.type]
         end
     end
     

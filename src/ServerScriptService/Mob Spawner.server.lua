@@ -1,6 +1,7 @@
 local ServerScriptService = game:GetService("ServerScriptService")
 local ServerStorage = game:GetService("ServerStorage")
 local CollectionService = game:GetService("CollectionService")
+local players = game:GetService("Players")
 
 local Spawner = workspace.Baseplate -- The part to spawn entities on
 local template = ServerStorage.Enemies.Dummy -- Your entity model to clone
@@ -14,8 +15,25 @@ local EnemyCount = 0
 local size = Spawner.Size
 local topY = Spawner.Position.Y + (size.Y / 2)
 
+-- wait for players to connect. 
+while #players:GetChildren() < 1 do 
+	task.wait(0.1)
+end
+
+local function randomPosition()
+
+	local offsetX = math.random(-size.X/2, size.X/2)
+	local offsetZ = math.random(-size.Z/2, size.Z/2)
+
+	return offsetX, offsetZ
+end
+
+
+
 -- Modules
 local enemyTypes = require(ServerScriptService.EnemieAI:FindFirstChild("enemyTypes"))
+local BaseAi = require(ServerScriptService.EnemieAI:WaitForChild("BaseAi"))
+
 
 while true do
 	
@@ -27,25 +45,32 @@ while true do
 
 	end
 	-- Random number of mobs in this pack
-	local packSize = math.random(minPackSize, maxPackSize)
-	local type = enemyTypes.getWeightedRandomType()
+	local enemyType = enemyTypes.getWeightedRandomType()
+	local packSize = math.random(enemyType.minPackSize, enemyType.maxPackSize)
+
+	local offsetX, offsetZ = randomPosition()
 	
 	for i = 1, packSize do
 		-- Random offsets from center of part
-		local offsetX = math.random(-size.X/2, size.X/2)
-		local offsetZ = math.random(-size.Z/2, size.Z/2)
+		if enemyType.spawnType == "Spread" then 
+			offsetX, offsetZ = randomPosition()
+		end
 
-		local enemyScript = ServerScriptService.EnemieAI.EnemyAi:Clone()
-
+		
 		-- Create new entity
-		local entity = enemyTypes[type].model:Clone()
+		local entity = enemyType.model:Clone()
+		entity.PrimaryPart = entity:FindFirstChild("Head")
+		local enemyScript = ServerScriptService.EnemieAI.EnemyScript:Clone()
 		enemyScript.Parent = entity
 		entity.Parent = workspace.Enemies
 		local newCFrame = CFrame.new(
-			Spawner.Position.X + offsetX,
+			Spawner.Position.X + offsetX + math.random(-5,5),
 			topY + (entity.PrimaryPart.Size.Y / 2) + 2,
-			Spawner.Position.Z + offsetZ
+			Spawner.Position.Z + offsetZ + math.random(-5,5)
 		)
+
+		BaseAi.Active(entity, enemyType)
+
 		entity:PivotTo(newCFrame)
 
 		task.wait(0.1)
