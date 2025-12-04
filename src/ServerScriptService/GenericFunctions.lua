@@ -20,7 +20,7 @@ function genericFunctions.getClosestPlayer(enemy)
                 end
             end
         end
-        return closestPlayer
+        return closestPlayer, closestDist
 
 end
 
