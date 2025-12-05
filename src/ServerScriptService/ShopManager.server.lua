@@ -1,124 +1,211 @@
-ReplicatedStorage = game:GetService("ReplicatedStorage")
-ServerStorage = game:GetService("ServerStorage")
-ServerScriptService = game:GetService("ServerScriptService")
+--[[
+	Loot Selection and Reroll Handler
 
-RerollEvent = ReplicatedStorage:WaitForChild("RerollEvent")
-LootEvent = ReplicatedStorage:WaitForChild("LootEvent")
-MoneyEvent = ReplicatedStorage:WaitForChild("MoneyEvent")
-SelectionEvent = ReplicatedStorage:WaitForChild("SelectionEvent")
+	This script manages the loot selection system, including:
+	- Player loot rerolls with escalating costs per wave
+	- Applying selected loot rewards (stats and spells) to players
+	- Money transactions for rerolls
+	- Reroll count tracking that resets each wave
 
-LootModule = require(ServerScriptService.LootModule)
-PlayerDataModule = require(ServerScriptService.plrDataModule)
-MoneyModule = require(ServerScriptService.MoneyModule)
-WaveModule = require(ServerScriptService.WaveModule)
-RerollModule = require(ServerScriptService.RerollModule)
+	Main Events:
+	- RerollEvent: Handles player reroll requests (costs money, generates new loot)
+	- MoneyEvent: Handles money-related requests
+	- SelectionEvent: Applies chosen loot reward to player stats/abilities
 
-local RerollCounts = {} -- Store reroll counts per player
-local plrLootData = {} -- Store player data 
-local CurrentWave = nil 
+	Reroll System:
+	- Cost formula: 3 * (CurrentWave + PlayerRerollCount)
+	- Reroll counts reset when wave changes
+	- Generates 3 new loot items per reroll
 
-RerollEvent.OnServerEvent:Connect(function(Player)
-	local UserId = Player.UserId
+	Dependencies:
+	- LootModule: Generates and manages loot rewards
+	- PlayerDataModule: Accesses player stats and data
+	- MoneyModule: Handles currency transactions
+	- WaveModule: Tracks current wave number
+	- RerollModule: (imported but unused - consider removing)
+--]]
 
-	if not RerollCounts[UserId]  then
-		RerollCounts[UserId] = 0
-	end
+-- Services
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+local Players = game:GetService("Players")
 
-	-- Initialize count if player hasn't rerolled before
-	if CurrentWave ~= WaveModule.Get() then
-		for userId, _ in pairs(RerollCounts) do
+-- Events
+local RerollEvent = ReplicatedStorage:WaitForChild("RerollEvent")
+local LootEvent = ReplicatedStorage:WaitForChild("LootEvent")
+local MoneyEvent = ReplicatedStorage:WaitForChild("MoneyEvent")
+local SelectionEvent = ReplicatedStorage:WaitForChild("SelectionEvent")
+
+-- Modules
+local LootModule = require(ServerScriptService.LootModule)
+local PlayerDataModule = require(ServerScriptService.plrDataModule)
+local MoneyModule = require(ServerScriptService.MoneyModule)
+local WaveModule = require(ServerScriptService.WaveModule)
+-- local RerollModule = require(ServerScriptService.RerollModule) -- Unused, consider removing
+
+-- Configuration
+local CONFIG = {
+	RerollBasePrice = 3,
+	LootRollsPerReroll = 3,
+	RerollPriceIncrement = 3,
+}
+
+-- State Management
+local RerollCounts = {} -- Store reroll counts per player (by UserId)
+local CurrentWave = nil
+
+-- Utility Functions
+local function getRerollPrice(wave, rerollCount)
+	return CONFIG.RerollBasePrice * (wave + rerollCount)
+end
+
+local function resetRerollCountsIfNewWave()
+	local currentWave = WaveModule.Get()
+
+	if CurrentWave ~= currentWave then
+		-- New wave detected - reset all reroll counts
+		for userId in pairs(RerollCounts) do
 			RerollCounts[userId] = 0
 		end
-		CurrentWave = WaveModule.Get()
+		CurrentWave = currentWave
 	end
-	
-	-- Calculate the Reroll Price
-	local Price = 3 * (WaveModule.Get() + RerollCounts[UserId])
-	
-	-- Check if player has enough money
-	local PlayerStats = PlayerDataModule.fetchPlrStats(Player)
-	if PlayerStats.Money.Value < Price then
+end
+
+local function getPlayerFolder(player)
+	return ServerStorage.PlayerData:FindFirstChild(player.Name .. " - " .. player.UserId)
+end
+
+local function applyStatReward(playerStats, lootItem)
+	local statObject = playerStats:FindFirstChild(lootItem.id)
+
+	if statObject then
+		statObject.Value = statObject.Value + lootItem.amount
+	else
+		warn("Stat not found:", lootItem.id, "for player")
+	end
+end
+
+local function applySpellReward(playerAbilities, lootItem)
+	local spellObject = playerAbilities:FindFirstChild(lootItem.id)
+
+	if not spellObject then
+		-- Create new spell/ability
+		spellObject = Instance.new("IntValue")
+		spellObject.Name = lootItem.id
+		spellObject.Value = 0
+		spellObject.Parent = playerAbilities
+	end
+
+	spellObject.Value = spellObject.Value + lootItem.amount
+end
+
+local function updatePlayerCharacter(player, playerStats)
+	local character = player.Character
+	if not character then return end
+
+	local humanoid = character:FindFirstChild("Humanoid")
+	if not humanoid then return end
+
+	-- Update character stats
+	humanoid.MaxHealth = playerStats.health.Value
+	humanoid.Health = playerStats.health.Value -- Also heals player
+	humanoid.WalkSpeed = playerStats.speed.Value
+end
+
+-- Event Handlers
+RerollEvent.OnServerEvent:Connect(function(player)
+	resetRerollCountsIfNewWave()
+
+	local userId = player.UserId
+
+	-- Initialize reroll count for new players
+	if not RerollCounts[userId] then
+		RerollCounts[userId] = 0
+	end
+
+	-- Calculate reroll price
+	local price = getRerollPrice(WaveModule.Get(), RerollCounts[userId])
+
+	-- Check if player can afford reroll
+	local playerStats = PlayerDataModule.fetchPlrStats(player)
+	if not playerStats or not playerStats.Money then
+		warn("Player stats not found for", player.Name)
 		return
 	end
-	
-	MoneyModule.Remove(Player, Price)
 
-	-- Increment the reroll count
-	RerollCounts[UserId] = RerollCounts[UserId] + 1
-
-	local PlayerLoot = LootModule.GenerateReward(Player, 3)
-	LootEvent:FireClient(Player, PlayerLoot)
-	RerollEvent:FireClient(Player, Price + 3)
-
-	-- Optional: Print or use the count
-	--print(Player.Name .. " has rerolled " .. RerollCounts[UserId] .. " times")
-end)
-
-
-MoneyEvent.OnServerEvent:Connect(function(Player, Action)
-	
-	if Action == "get" then
-		MoneyModule.Get(Player)
-		--local PlayerStats = PlayerDataModule.fetchPlrStats(Player)
-		--MoneyEvent:FireClient(Player, PlayerStats.Money, "get")	
-	end
-	
-end)
-
-SelectionEvent.OnServerEvent:Connect(function(Player, Selection)
-
-	print("Recived Selection")
-
-	plrLootData = LootModule.GetPlayerLoot(Player) 
-	
-	print(plrLootData)
-	
-	if plrLootData then 
-		local plrFolder = ServerStorage.PlayerData:FindFirstChild(Player.Name .. " - " .. Player.UserId)
-		local PlayerStats = plrFolder.Stats
-		local PlayerAbilities = plrFolder.Abilities
-		local plrLootList = plrLootData		
-		local plrSelection = plrLootList[Selection]
-
-		--if not plrFolder:FindFirstChild(plrSelection.id) then 
-		--	local obj = Instance.new("IntValue")
-		--	obj.Name = plrSelection.id
-		--	obj.Value = 0
-		--	obj.Parent = plrFolder
-
-		--end
-
-		if plrSelection.type == "stat" then
-			PlayerStats[plrSelection.id].Value = plrSelection.amount + PlayerStats[plrSelection.id].Value
-
-		elseif plrSelection.type == "spell" then
-			if not PlayerAbilities:FindFirstChild(plrSelection.id) then 
-				local obj = Instance.new("IntValue")
-				obj.Name = plrSelection.id
-				obj.Value = 0
-				obj.Parent = PlayerAbilities   
-			end
-
-			PlayerAbilities[plrSelection.id].Value = plrSelection.amount + PlayerAbilities[plrSelection.id].Value
-
-
-		end
-
-
-		Player.Character.Humanoid.MaxHealth = PlayerStats.health.Value
-		Player.Character.Humanoid.WalkSpeed = PlayerStats.speed.Value
-
-		-- Heals player
-		Player.Character.Humanoid.Health = PlayerStats.health.Value
-
-		LootModule.RemovePlayerLoot(Player)
+	if playerStats.Money.Value < price then
+		-- Not enough money - could send feedback to client
+		return
 	end
 
+	-- Process reroll
+	MoneyModule.Remove(player, price)
+	RerollCounts[userId] = RerollCounts[userId] + 1
 
+	-- Generate new loot
+	local playerLoot = LootModule.GenerateReward(player, CONFIG.LootRollsPerReroll)
+
+	-- Send updated data to client
+	LootEvent:FireClient(player, playerLoot)
+	RerollEvent:FireClient(player, price + CONFIG.RerollPriceIncrement)
 end)
 
+MoneyEvent.OnServerEvent:Connect(function(player, action)
+	if action == "get" then
+		MoneyModule.Get(player)
+	else
+		warn("Unknown money action:", action)
+	end
+end)
 
--- Clean up when player leaves to prevent memory leaks
-game.Players.PlayerRemoving:Connect(function(Player)
-	RerollCounts[Player.UserId] = nil
+SelectionEvent.OnServerEvent:Connect(function(player, selectionIndex)
+	local playerLoot = LootModule.GetPlayerLoot(player)
+
+	if not playerLoot then
+		warn("No loot data found for", player.Name)
+		return
+	end
+
+	if not selectionIndex or selectionIndex < 1 or selectionIndex > #playerLoot then
+		warn("Invalid selection index:", selectionIndex, "for", player.Name)
+		return
+	end
+
+	-- Get player's data folder
+	local playerFolder = getPlayerFolder(player)
+	if not playerFolder then
+		warn("Player folder not found for", player.Name)
+		return
+	end
+
+	local playerStats = playerFolder:FindFirstChild("Stats")
+	local playerAbilities = playerFolder:FindFirstChild("Abilities")
+
+	if not playerStats or not playerAbilities then
+		warn("Stats or Abilities folder missing for", player.Name)
+		return
+	end
+
+	-- Apply the selected loot
+	local selectedLoot = playerLoot[selectionIndex]
+
+	if selectedLoot.type == "stat" then
+		applyStatReward(playerStats, selectedLoot)
+	elseif selectedLoot.type == "spell" then
+		applySpellReward(playerAbilities, selectedLoot)
+	else
+		warn("Unknown loot type:", selectedLoot.type)
+	end
+
+	-- Update player character with new stats
+	updatePlayerCharacter(player, playerStats)
+
+	-- Clear the player's loot data
+	LootModule.RemovePlayerLoot(player)
+end)
+
+-- Cleanup
+Players.PlayerRemoving:Connect(function(player)
+	RerollCounts[player.UserId] = nil
 end)

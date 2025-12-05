@@ -1,3 +1,32 @@
+--[[
+	Ability System Handler
+	
+	This script manages the server-side logic for player abilities in the game.
+	
+	Main Functions:
+	- Listens for ability activation requests from clients via RemoteEvent
+	- Validates if a player can use a specific ability (checks if learned and not on cooldown)
+	- Loads and executes ability modules dynamically from ServerScriptService/Abilities
+	- Tracks cooldowns per player to prevent ability spam
+	- Passes player stats to ability modules for damage/effect calculations
+	
+	How It Works:
+	1. Client fires AbilityEvent with ability name, mouse position, and spawn type
+	2. Server checks if ability exists and player has learned it
+	3. Server verifies ability is not on cooldown
+	4. Server executes the ability's Activate function with player data
+	5. Server sets cooldown timer based on ability's Cooldown property
+	
+	Ability Module Requirements:
+	- Must have an Activate(player, mousePos, stats) function
+	- Should have a Cooldown property (number in seconds)
+	- Must be stored in ServerScriptService/Abilities folder
+	
+	Dependencies:
+	- plrDataModule: Provides fetchPlrStatsTable function for player stats
+	- Individual ability modules in ServerScriptService/Abilities
+--]]
+
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 local ServerScriptService = game:GetService("ServerScriptService")

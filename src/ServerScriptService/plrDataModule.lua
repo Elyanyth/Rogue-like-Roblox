@@ -1,4 +1,4 @@
-local plrStatModule = {}
+local plrDataModule = {}
 
 local serverStorage = game:GetService("ServerStorage")
 
@@ -14,7 +14,7 @@ export type PlayerStats = {
 }
 
 -- Default stats table in correct Lua format
-plrStatModule.DefaultStats = {
+plrDataModule.DefaultStats = {
 	health = 100,
 	speed = 20,
 	strength = 0,
@@ -27,26 +27,29 @@ plrStatModule.DefaultStats = {
 	Money = 20
 }
 
+function plrDataModule.getPlayerFolder(player)
+	local playerFolder = serverStorage.PlayerData:FindFirstChild(player.Name .. " - " .. player.UserId)
+	return playerFolder
+end
 
-function plrStatModule.fetchPlrData(player)
-	local plrData = serverStorage.PlayerData:FindFirstChild(player.Name .. " - " .. player.UserId)
-	return plrData:GetChildren()
+function plrDataModule.fetchPlrData(player)
+	local playerData = plrDataModule.getPlayerFolder(player)
+	return playerData:GetChildren()
 end
 	
-function plrStatModule.fetchPlrStats(player)
-	local plrData = serverStorage.PlayerData:FindFirstChild(player.Name .. " - " .. player.UserId)
-	local PlayerStats = plrData.Stats
+function plrDataModule.fetchPlrStats(player)
+	local playerData = plrDataModule.getPlayerFolder(player)
+	local PlayerStats = playerData.Stats
 	return PlayerStats
 end
 
-function plrStatModule.fetchPlrStatsTable(player)
+function plrDataModule.fetchPlrStatsTable(player)
 	
-	local plrData = serverStorage.PlayerData:FindFirstChild(player.Name .. " - " .. player.UserId)
-	local PlayerStats = plrData.Stats
+	local playerStats = plrDataModule.fetchPlrStats(player)
 
 	-- Create a table with Name = Value for each IntValue
 	local StatsTable = {}
-	for _, stat in ipairs(PlayerStats:GetChildren()) do
+	for _, stat in ipairs(playerStats:GetChildren()) do
 		if stat:IsA("IntValue") then
 			StatsTable[stat.Name] = stat.Value
 		end
@@ -55,5 +58,5 @@ function plrStatModule.fetchPlrStatsTable(player)
 	return StatsTable
 end
 
-return plrStatModule
+return plrDataModule
 

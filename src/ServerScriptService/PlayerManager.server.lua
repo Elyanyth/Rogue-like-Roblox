@@ -1,3 +1,25 @@
+--[[
+	Player Data Management System
+	
+	This script manages player data storage and initialization in Roblox.
+	
+	Main Functions:
+	- Creates a folder structure in ServerStorage for each player when they join
+	- Initializes player stats from a default configuration module
+	- Sets up folders for Stats, Abilities, and Items for each player
+	- Handles cleanup when players leave the game
+	- Provides a RemoteEvent for client-server data communication
+	
+	Folder Structure Created:
+	ServerStorage/PlayerData/[PlayerName - UserID]/
+		├── Stats/ (populated with default stats from plrDataModule)
+		├── Abilities/ (contains PrimaryAttack IntValue)
+		└── Items/ (for future item storage)
+	
+	Dependencies:
+	- plrDataModule: Contains DefaultStats table and fetchPlrStatsTable function
+--]]
+
 local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

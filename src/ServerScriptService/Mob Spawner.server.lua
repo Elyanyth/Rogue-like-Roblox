@@ -1,99 +1,173 @@
+--[[
+	Enemy Spawner System
+	
+	This script continuously spawns enemy packs in the game world with weighted random selection.
+	
+	Main Functions:
+	- Spawns enemy packs at regular intervals on a designated spawner surface
+	- Uses weighted random system to select enemy types with varying spawn rates
+	- Validates spawn positions to prevent enemies spawning too close to players
+	- Manages total enemy count to maintain performance (max 75 enemies)
+	- Supports two spawn patterns: "Spread" (scattered) and grouped spawning
+	
+	How It Works:
+	1. Waits for at least one player to join the game
+	2. Checks current enemy count via CollectionService "Enemy" tag
+	3. If below max count, selects a random enemy type using weighted probabilities
+	4. Spawns a pack of enemies (size determined by enemy type settings)
+	5. Validates each spawn is at least 15 studs away from nearest player
+	6. Retries spawn position up to 10 times if too close to players
+	7. Waits for spawn interval before next pack
+	
+	Spawn Configuration:
+	- spawnInterval: Time in seconds between pack spawns (default: 1)
+	- minPackSize/maxPackSize: Global pack size range (can be overridden by enemy type)
+	- maxCount: Maximum total enemies allowed in world (default: 75)
+	- Spawner: The part enemies spawn on (currently workspace.Baseplate)
+	
+	Spawn Types:
+	- "Spread": Each enemy in pack gets random position across spawner
+	- Other: All enemies in pack spawn near same location with small offset
+	
+	Dependencies:
+	- enemyTypes module: Contains enemy definitions with weights and properties
+	- BaseAi module: Handles enemy AI behavior after spawning
+	- GenericFunctions module: Provides getClosestPlayer utility function
+	- ServerStorage.Enemies.Dummy: Template enemy model to clone
+	- CollectionService "Enemy" tag: Used to track total enemy count
+	
+	Safety Features:
+	- Maximum 10 spawn attempts per enemy to prevent infinite loops
+	- Distance check prevents spawn camping near players
+	- Enemy count cap maintains server performance
+--]]
+
 local ServerScriptService = game:GetService("ServerScriptService")
 local ServerStorage = game:GetService("ServerStorage")
 local CollectionService = game:GetService("CollectionService")
-local players = game:GetService("Players")
+local Players = game:GetService("Players")
 
-local Spawner = workspace.Baseplate -- The part to spawn entities on
-local template = ServerStorage.Enemies.Dummy -- Your entity model to clone
-local spawnInterval = 1 -- seconds between each pack spawn
-local minPackSize = 3 -- smallest group size
-local maxPackSize = 6 -- largest group size
-local maxCount = 75
-local EnemyCount = 0
-
--- Get size and position for random placement
-local size = Spawner.Size
-local topY = Spawner.Position.Y + (size.Y / 2)
-
--- wait for players to connect.
-while #players:GetChildren() < 1 do
-	task.wait(0.1)
-end
-
-local function randomPosition()
-
-	local offsetX = math.random(-size.X/2, size.X/2)
-	local offsetZ = math.random(-size.Z/2, size.Z/2)
-
-	return offsetX, offsetZ
-end
-
-
+-- Configuration (consolidated at top for easy tweaking)
+local CONFIG = {
+	Spawner = workspace.Baseplate,
+	SpawnInterval = 1,
+	MaxEnemyCount = 75,
+	MinPlayerDistance = 15, -- Minimum distance from players to spawn
+	MaxSpawnAttempts = 10,
+	SpawnJitter = 5, -- Random position offset range
+	PackSpawnDelay = 0.1,
+}
 
 -- Modules
 local enemyTypes = require(ServerScriptService.EnemieAI:FindFirstChild("enemyTypes"))
 local BaseAi = require(ServerScriptService.EnemieAI:WaitForChild("BaseAi"))
 local genericFunctions = require(ServerScriptService.GenericFunctions)
 
+-- Cache spawner properties
+local spawnerSize = CONFIG.Spawner.Size
+local spawnerTopY = CONFIG.Spawner.Position.Y + (spawnerSize.Y / 2)
 
-while true do
-
-	EnemyCount = #CollectionService:GetTagged("Enemy")
-
-	while EnemyCount >= maxCount do
-		task.wait(0.1) -- wait a short time before checking again
-		EnemyCount = #CollectionService:GetTagged("Enemy")
+-- Utility Functions
+local function waitForPlayers()
+	while #Players:GetPlayers() < 1 do
+		task.wait(0.5)
 	end
-	-- Random number of mobs in this pack
-	local enemyType = enemyTypes.getWeightedRandomType()
-	local packSize = math.random(enemyType.minPackSize, enemyType.maxPackSize)
+end
 
-	local offsetX, offsetZ = randomPosition()
+local function getRandomPosition()
+	local offsetX = math.random(-spawnerSize.X/2, spawnerSize.X/2)
+	local offsetZ = math.random(-spawnerSize.Z/2, spawnerSize.Z/2)
+	return offsetX, offsetZ
+end
 
-	for i = 1, packSize do
-		local validSpawn = false
-		local attempts = 0
-		local maxAttempts = 10 -- prevent infinite loop
+local function getCurrentEnemyCount()
+	return #CollectionService:GetTagged("Enemy")
+end
 
-		repeat
-			attempts = attempts + 1
+local function createSpawnPosition(baseX, baseZ, enemyHeight)
+	return CFrame.new(
+		CONFIG.Spawner.Position.X + baseX + math.random(-CONFIG.SpawnJitter, CONFIG.SpawnJitter),
+		spawnerTopY + (enemyHeight / 2) + 2,
+		CONFIG.Spawner.Position.Z + baseZ + math.random(-CONFIG.SpawnJitter, CONFIG.SpawnJitter)
+	)
+end
 
-			-- Random offsets from center of part
-			if enemyType.spawnType == "Spread" then
-				offsetX, offsetZ = randomPosition()
-			end
+local function isValidSpawnLocation(entity)
+	local closestPlayer, distance = genericFunctions.getClosestPlayer(entity)
+	return distance > CONFIG.MinPlayerDistance
+end
 
-			-- Create new entity
-			local entity = enemyType.model:Clone()
-			entity.PrimaryPart = entity:FindFirstChild("Head")
-			local enemyScript = ServerScriptService.EnemieAI.EnemyScript:Clone()
-			enemyScript.Parent = entity
-			local newCFrame = CFrame.new(
-				Spawner.Position.X + offsetX + math.random(-5,5),
-				topY + (entity.PrimaryPart.Size.Y / 2) + 2,
-				Spawner.Position.Z + offsetZ + math.random(-5,5)
-			)
-			entity:PivotTo(newCFrame)
-
-			local closestPlayer, distance = genericFunctions.getClosestPlayer(entity)
-
-			if distance > 15 then
-				entity.Parent = workspace.Enemies
-				BaseAi.Active(entity, enemyType)
-				validSpawn = true
-			else
-				-- print("Enemy spawned to close trying again.")
-				entity:Destroy() -- clean up failed spawn
-			end
-
-		until validSpawn or attempts >= maxAttempts
-
-		if not validSpawn then
-			warn("Could not find valid spawn position after", maxAttempts, "attempts")
+local function spawnSingleEnemy(enemyType, baseX, baseZ)
+	local offsetX, offsetZ = baseX, baseZ
+	
+	for attempt = 1, CONFIG.MaxSpawnAttempts do
+		-- Recalculate position for spread spawns
+		if enemyType.spawnType == "Spread" then
+			offsetX, offsetZ = getRandomPosition()
 		end
-
-		task.wait(0.1)
+		
+		-- Create and position entity
+		local entity = enemyType.model:Clone()
+		entity.PrimaryPart = entity:FindFirstChild("Head")
+		
+		if not entity.PrimaryPart then
+			warn("Enemy model missing Head (PrimaryPart)")
+			entity:Destroy()
+			return false
+		end
+		
+		local enemyScript = ServerScriptService.EnemieAI.EnemyScript:Clone()
+		enemyScript.Parent = entity
+		
+		local spawnCFrame = createSpawnPosition(offsetX, offsetZ, entity.PrimaryPart.Size.Y)
+		entity:PivotTo(spawnCFrame)
+		
+		-- Validate spawn location
+		if isValidSpawnLocation(entity) then
+			entity.Parent = workspace.Enemies
+			BaseAi.Active(entity, enemyType)
+			return true
+		else
+			entity:Destroy()
+		end
 	end
+	
+	warn("Failed to find valid spawn after", CONFIG.MaxSpawnAttempts, "attempts")
+	return false
+end
 
-	task.wait(spawnInterval)
+local function spawnEnemyPack(enemyType)
+	local packSize = math.random(enemyType.minPackSize, enemyType.maxPackSize)
+	local baseX, baseZ = getRandomPosition()
+	
+	for i = 1, packSize do
+		-- Check if we've hit the cap mid-spawn
+		if getCurrentEnemyCount() >= CONFIG.MaxEnemyCount then
+			break
+		end
+		
+		spawnSingleEnemy(enemyType, baseX, baseZ)
+		task.wait(CONFIG.PackSpawnDelay)
+	end
+end
+
+-- Main Spawning Loop
+local function runSpawner()
+	waitForPlayers()
+	
+	while true do
+		-- Only spawn if below capacity
+		if getCurrentEnemyCount() < CONFIG.MaxEnemyCount then
+			local enemyType = enemyTypes.getWeightedRandomType()
+			spawnEnemyPack(enemyType)
+		end
+		
+		task.wait(CONFIG.SpawnInterval)
+	end
+end
+
+-- Start the spawner
+local success, err = pcall(runSpawner)
+if not success then
+	warn("Spawner error:", err)
 end

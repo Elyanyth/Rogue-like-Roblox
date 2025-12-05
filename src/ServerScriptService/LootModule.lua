@@ -1,3 +1,41 @@
+--[[
+	Loot Generation Module
+	
+	This module handles random loot generation using a weighted probability system.
+	
+	Main Functions:
+	- GenerateReward(player, rolls): Creates random loot drops based on weighted chances
+	- GetPlayerLoot(player): Retrieves currently pending loot for a player
+	- RemovePlayerLoot(player): Clears a player's pending loot data
+	
+	How It Works:
+	1. Uses a weighted random system where each loot item has a weight value
+	2. Higher weight = higher chance of being selected
+	3. Generates specified number of rolls per reward generation
+	4. Each roll produces an item with a random amount between min and max
+	5. Sends loot data to client via LootEvent RemoteEvent
+	
+	Loot Types:
+	- "stat": Player stat increases (health, speed, strength, armor, etc.)
+	- "spell": Ability/spell unlocks (currently just Fireball)
+	
+	Loot Table Properties:
+	- id: Name/identifier of the loot item
+	- weight: Probability weight (higher = more common)
+	- type: Category of loot ("stat" or "spell")
+	- min/max: Range for random amount generation
+	
+	Usage Example:
+	local loot = LootModule.GenerateReward(player, 3) -- Generate 3 random items
+	
+	Dependencies:
+	- LootEvent: RemoteEvent in ReplicatedStorage for sending loot to clients
+	
+	Notes:
+	- Uses tick() + player.UserId for seeding to reduce predictability
+	- Stores pending loot in PlayerLootData table until claimed/removed
+--]]
+
 local LootModule = {}
 
 -- Services
