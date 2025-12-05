@@ -82,7 +82,7 @@ while true do
 				BaseAi.Active(entity, enemyType)
 				validSpawn = true
 			else
-				print("Enemy spawned to close trying again.")
+				-- print("Enemy spawned to close trying again.")
 				entity:Destroy() -- clean up failed spawn
 			end
 

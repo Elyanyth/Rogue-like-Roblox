@@ -14,7 +14,6 @@ enemyTypes.Chase = {
     minPackSize = 2,
     maxPackSize = 4,
     spawnType = "Spread"
-
 }
 
 enemyTypes.Swarm = {

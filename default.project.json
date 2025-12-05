@@ -15,7 +15,9 @@
     "ServerStorage": {
       "$className": "ServerStorage",
       "$ignoreUnknownInstances": true,
-      "$path": "src/ServerStorage"
+      "Scripts": {
+        "$path": "src/ServerStorage/Scripts"
+      }
     },
     "StarterGui": {
       "$className": "StarterGui",
