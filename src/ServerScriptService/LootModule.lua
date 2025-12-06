@@ -1,143 +1,190 @@
 --[[
-	Loot Generation Module
-	
-	This module handles random loot generation using a weighted probability system.
-	
-	Main Functions:
-	- GenerateReward(player, rolls): Creates random loot drops based on weighted chances
-	- GetPlayerLoot(player): Retrieves currently pending loot for a player
-	- RemovePlayerLoot(player): Clears a player's pending loot data
-	
-	How It Works:
-	1. Uses a weighted random system where each loot item has a weight value
-	2. Higher weight = higher chance of being selected
-	3. Generates specified number of rolls per reward generation
-	4. Each roll produces an item with a random amount between min and max
-	5. Sends loot data to client via LootEvent RemoteEvent
-	
-	Loot Types:
-	- "stat": Player stat increases (health, speed, strength, armor, etc.)
-	- "spell": Ability/spell unlocks (currently just Fireball)
-	
-	Loot Table Properties:
-	- id: Name/identifier of the loot item
-	- weight: Probability weight (higher = more common)
-	- type: Category of loot ("stat" or "spell")
-	- min/max: Range for random amount generation
-	
-	Usage Example:
-	local loot = LootModule.GenerateReward(player, 3) -- Generate 3 random items
-	
-	Dependencies:
-	- LootEvent: RemoteEvent in ReplicatedStorage for sending loot to clients
-	
-	Notes:
-	- Uses tick() + player.UserId for seeding to reduce predictability
-	- Stores pending loot in PlayerLootData table until claimed/removed
+    Loot Generation Module
+    
+    This module handles random loot generation using a weighted probability system.
+    
+    Main Functions:
+    - GenerateReward(player, rolls): Creates random loot drops based on weighted chances
+    - GetPlayerLoot(player): Retrieves currently pending loot for a player
+    - RemovePlayerLoot(player): Clears a player's pending loot data
+    
+    How It Works:
+    1. Uses a weighted random system where each loot item has a weight value
+    2. Higher weight = higher chance of being selected
+    3. Generates specified number of rolls per reward generation
+    4. Each roll produces an item with a random amount between min and max
+    5. Sends loot data to client via LootEvent RemoteEvent
+    
+    Loot Types:
+    - "stat": Player stat increases (health, speed, strength, armor, etc.)
+    - "spell": Ability/spell unlocks (currently just Fireball)
+    
+    Loot Table Properties:
+    - id: Name/identifier of the loot item
+    - weight: Probability weight (higher = more common)
+    - type: Category of loot ("stat" or "spell")
+    - min/max: Range for random amount generation
+    
+    Usage Example:
+    local loot = LootModule.GenerateReward(player, 3) -- Generate 3 random items
+    
+    Dependencies:
+    - LootEvent: RemoteEvent in ReplicatedStorage for sending loot to clients
+    
+    Notes:
+    - Uses os.clock() + player.UserId for seeding to reduce predictability
+    - Stores pending loot in PlayerLootData table until claimed/removed
+    - Automatically cleans up player loot data on disconnect
 --]]
 
 local LootModule = {}
 
 -- Services
-local ServerScriptService = game:GetService("ServerScriptService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
+local ServerScriptService = game:GetService("ServerScriptService")
 
 -- Events
-
-local LootEvent = ReplicatedStorage:FindFirstChild("LootEvent")
-
-local LOOT = {
-	{ id = "health",   weight = 100, type = "stat", min = 5, max = 10 },
-	{ id = "speed",    weight = 100, type = "stat", min = 1, max = 3 },
-	{ id = "strength", weight = 100, type = "stat", min = 3, max = 5 },
-	{ id = "armor",    weight = 100, type = "stat", min = 1, max = 5 },
-	{ id = "critRate", weight = 100, type = "stat", min = 5, max = 15 },
-	{ id = "critDamage", weight = 100, type = "stat", min = 5, max = 15 },
-	{ id = "healthRegen", weight = 100, type = "stat", min = 1, max = 2 },
-	{ id = "cooldownReduction", weight = 100, type = "stat", min = 10, max = 25 },
-	{ id = "Income", weight = 100, type = "stat", min = 10, max = 20 },
-	{ id = "Fireball", weight = 100, type = "spell", min = 1, max = 1 },
+local LootEvent = ReplicatedStorage:WaitForChild("LootEvent")
 
 
-}
+-- Modules 
+local lootTable = require(ServerScriptService.ShopScripts.LootTable)
 
-local PlayerLootData = {} 
+-- Loot table configuration
+-- Consider moving this to a ModuleScript if it gets large
+local LOOT = lootTable.ALL_LOOT
 
+-- Store pending loot for each player
+-- Cleared when player leaves or loot is claimed
+local PlayerLootData = {}
 
-local function randRange()
-	local seed = tick()
-	local rand = Random.new(seed)
-	
-	
-end 
-
-local function totalWeight(table)
-	local s = 0
-	for _, v in ipairs(table) do s = s + (v.weight or 0) end
-	return s
+-- Pre-calculate total weight once (optimization)
+local TOTAL_WEIGHT = 0
+for _, item in ipairs(LOOT) do
+    TOTAL_WEIGHT = TOTAL_WEIGHT + (item.weight or 0)
 end
 
-local function pickWeighted(rand, table)
-	local t = totalWeight(table)
-	if t <= 0 then return nil end
-	local r = rand:NextNumber() * t  -- NextNumber returns [0,1)
-	local acc = 0
-	for _, v in ipairs(table) do
-		acc = acc + v.weight
-		if r < acc then
-			return v
-		end
-	end
-	-- fallback
-	return table[#table]
+-- Calculate total weight of a loot table
+local function totalWeight(lootTable)
+    local sum = 0
+    for _, v in ipairs(lootTable) do
+        sum = sum + (v.weight or 0)
+    end
+    return sum
 end
 
--- Generates a reward for the player and returns the loot entry (doesn't actually apply it)
+-- Pick a random item based on weighted probability
+-- Uses the "roulette wheel" selection algorithm
+local function pickWeighted(rand, lootTable)
+    local total = totalWeight(lootTable)
+    if total <= 0 then 
+        warn("LootModule: Total weight is 0, cannot pick item")
+        return nil 
+    end
+    
+    local roll = rand:NextNumber() * total
+    local accumulated = 0
+    
+    for _, item in ipairs(lootTable) do
+        accumulated = accumulated + item.weight
+        if roll < accumulated then
+            return item
+        end
+    end
+    
+    -- Fallback (should rarely happen due to floating point)
+    return lootTable[#lootTable]
+end
+
+-- Generates a reward for the player and returns the loot entry
+-- Parameters:
+--   player: The player receiving the loot
+--   rolls: Number of items to generate (default 1)
+-- Returns: Array of loot items or nil if generation fails
 function LootModule.GenerateReward(player, rolls)
-	local lootTable = {}
-	
-	local seed = tick() + (player and player.UserId or 0)
-	local rand = Random.new(seed)
-	
-	for i = 1, rolls do
-		-- Use a per-call Random seeded with tick() and the player's UserId to reduce predictability
-
-		--print(seed)
-		--print(rand)
-		
-		local picked = pickWeighted(rand, LOOT)
-		if not picked then return nil end
-
-		-- Build a simple result table to return to caller
-		local result = {
-			id = picked.id,
-			type = picked.type,
-			amount = rand:NextInteger(picked.min, picked.max),
-			weight = picked.weight
-		}
-		
-		table.insert(lootTable, result)
-	end
-	
-	PlayerLootData[player] = lootTable
-	--print(PlayerLootData[player])
-
-	LootEvent:FireClient(player, lootTable)
-
-	return lootTable
+    if not player or not player:IsA("Player") then
+        warn("LootModule.GenerateReward: Invalid player provided")
+        return nil
+    end
+    
+    rolls = rolls or 1
+    if rolls <= 0 then
+        warn("LootModule.GenerateReward: Rolls must be greater than 0")
+        return nil
+    end
+    
+    local lootTable = {}
+    
+    -- Create seed using high-precision clock and player ID
+    local seed = math.floor(os.clock() * 1000) + player.UserId
+    local rand = Random.new(seed)
+    
+    -- Generate each roll
+    for i = 1, rolls do
+        local picked = pickWeighted(rand, LOOT)
+        
+        if not picked then
+            warn(`LootModule: Failed to pick item for roll {i}`)
+            continue
+        end
+        
+        -- Create loot item result
+        local result = {
+            id = picked.id,
+            type = picked.type,
+            amount = rand:NextInteger(picked.min, picked.max),
+            weight = picked.weight,
+            rollNumber = i -- Track which roll this was
+        }
+        
+        table.insert(lootTable, result)
+    end
+    
+    -- Store pending loot for this player
+    PlayerLootData[player] = lootTable
+    
+    -- Notify client about new loot
+    local success, err = pcall(function()
+        LootEvent:FireClient(player, lootTable)
+    end)
+    
+    if not success then
+        warn(`LootModule: Failed to fire loot event to client: {err}`)
+    end
+    
+    return lootTable
 end
 
-function LootModule.GetPlayerLoot(Player)
-	
-	return PlayerLootData[Player]
-	
+-- Retrieve pending loot for a player
+-- Returns: Loot table or nil if no pending loot
+function LootModule.GetPlayerLoot(player)
+    if not player or not player:IsA("Player") then
+        warn("LootModule.GetPlayerLoot: Invalid player provided")
+        return nil
+    end
+    
+    return PlayerLootData[player]
 end
 
-function LootModule.RemovePlayerLoot(Player)
-	
-	PlayerLootData[Player] = nil
-	
+-- Remove/clear pending loot for a player
+function LootModule.RemovePlayerLoot(player)
+    if not player then
+        warn("LootModule.RemovePlayerLoot: Invalid player provided")
+        return
+    end
+    
+    PlayerLootData[player] = nil
 end
 
+-- Check if player has pending loot
+function LootModule.HasPendingLoot(player)
+    return PlayerLootData[player] ~= nil and #PlayerLootData[player] > 0
+end
+
+-- Cleanup when player leaves
+Players.PlayerRemoving:Connect(function(player)
+    LootModule.RemovePlayerLoot(player)
+end)
 
 return LootModule

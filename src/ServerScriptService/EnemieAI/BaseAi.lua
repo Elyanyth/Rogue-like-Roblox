@@ -166,7 +166,8 @@ function BaseEnemy.Active(enemy, enemyType)
 		if not enemyState.isAlive then return end
 		if not rootPart or not rootPart.Parent then return end
 		
-		local targetPlayer = genericFunctions.getClosestPlayer(enemy)
+		local targetPlayer, distToTarget = genericFunctions.getClosestPlayer(enemy)
+        
 		if not targetPlayer or not targetPlayer.Character then 
 			humanoid:MoveTo(rootPart.Position) -- Stop moving
 			return 
@@ -174,8 +175,6 @@ function BaseEnemy.Active(enemy, enemyType)
 		
 		local targetHRP = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
 		if not targetHRP then return end
-		
-		local distToTarget = (targetHRP.Position - rootPart.Position).Magnitude
 		
 		-- Only chase if within range
 		if distToTarget > config.chaseRange then
