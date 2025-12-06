@@ -7,7 +7,8 @@ local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 
 -- Modules
-LootModule = require(ServerScriptService.LootModule)
+local Modules = require(ServerScriptService.ModuleLoader)
+local LootModule = Modules.Get("LootModule")
 
 -- Events 
 local LootEvent = ReplicatedStorage:WaitForChild("LootEvent")

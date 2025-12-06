@@ -10,7 +10,8 @@ local StatManagerModule = {}
 	local lootEvent = ReplicatedStorage:FindFirstChild("LootEvent")
 
 	-- Module Scripts 
-	local LootModule = require(game.ServerScriptService:WaitForChild("LootModule"))
+	local Modules = require(ServerScriptService.ModuleLoader)
+	local LootModule = Modules.Get("LootModule")
 
 	if not lootEvent then
 		lootEvent = Instance.new("RemoteEvent")
