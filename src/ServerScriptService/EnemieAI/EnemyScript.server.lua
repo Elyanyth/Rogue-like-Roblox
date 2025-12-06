@@ -1,9 +1,9 @@
 local ServerScriptService = game:GetService("ServerScriptService")
 
-
 -- Modules
-local BaseAi = require(ServerScriptService.EnemieAI:WaitForChild("BaseAi"))
-local enemyTypes = require(ServerScriptService.EnemieAI.enemyTypes)
+local Modules = require(ServerScriptService.ModuleLoader)
+local BaseAi = Modules.Get("BaseEnemy")
+local enemyTypes = Modules.Get("EnemyTypes")
 
 local enemy  = script.Parent
 if enemy ~= ServerScriptService.EnemieAI then 

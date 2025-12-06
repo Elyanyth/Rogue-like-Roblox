@@ -1,7 +1,9 @@
 -- Gradually regenerates the Humanoid's Health over time.
 
 -- Module
-local plrStatModule = require(game:GetService("ServerScriptService").plrDataModule)
+local ServerScriptService = game:GetService("ServerScriptService")
+local Modules = require(ServerScriptService.ModuleLoader)
+local plrStatModule = Modules.Get("PlayerData")
 local plrStats = plrStatModule.fetchPlrStats(game.Players:GetPlayerFromCharacter(script.Parent))
 
 local REGEN_RATE = plrStats.healthRegen.Value -- Regenerate this fraction of MaxHealth per second.

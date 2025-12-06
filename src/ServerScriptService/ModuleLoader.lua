@@ -18,16 +18,18 @@ local Modules = {
 	
     -- Shop Systems
 	LootModule = ServerScriptService:WaitForChild("ShopScripts"):WaitForChild("LootModule"),
+	LootTable = ServerScriptService:WaitForChild("ShopScripts"):WaitForChild("LootTable"),
 	MoneyModule = ServerScriptService:WaitForChild("ShopScripts"):WaitForChild("MoneyModule"),
+	StatManager = ServerScriptService:WaitForChild("StatManager"),
+	WaveModule = ServerScriptService:WaitForChild("WaveModule"),
+	RerollModule = ServerScriptService:WaitForChild("RerollModule"),
 
-	
-    -- Combat Systems
+
+	-- Combat Systems
 	BaseEnemy = ServerScriptService:WaitForChild("EnemieAI"):WaitForChild("BaseAi"),
 	EnemyTypes = ServerScriptService:WaitForChild("EnemieAI"):WaitForChild("enemyTypes"),
 	DamageModule = ServerScriptService:WaitForChild("DamageModule"),
 
-
-	
 	-- Utilities
 	GenericFunctions = ServerScriptService:WaitForChild("GenericFunctions"),
 	

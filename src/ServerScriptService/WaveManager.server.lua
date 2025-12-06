@@ -29,11 +29,9 @@ end
 local Modules = require(ServerScriptService.ModuleLoader)
 local LootModule = Modules.Get("LootModule")
 local MoneyModule = Modules.Get("MoneyModule")
-
-local StatManager = require(game.ServerScriptService:WaitForChild("StatManager"))
--- MoneyModule = require(ServerScriptService.MoneyModule)
-WaveModule = require(ServerScriptService.WaveModule)
-RerollModule = require(ServerScriptService.RerollModule)
+local StatManager = Modules.Get("StatManager")
+local WaveModule = Modules.Get("WaveModule")
+local RerollModule = Modules.Get("RerollModule")
 --local LootModule = require(game.ServerScriptService:WaitForChild("LootModule"))
 
 

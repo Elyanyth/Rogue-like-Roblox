@@ -10,7 +10,8 @@ local ServerStorage = game:GetService("ServerStorage")
 local SelectionEvent = ReplicatedStorage:FindFirstChild("SelectionEvent")
 
 -- Modules
-LootModule = require(ServerScriptService.LootModule)
+local Modules = require(ServerScriptService.ModuleLoader)
+local LootModule = Modules.Get("LootModule")
 
 -- Variables
 local plrLootData = {} 

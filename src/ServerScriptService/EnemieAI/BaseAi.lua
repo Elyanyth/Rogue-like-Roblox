@@ -77,9 +77,10 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local CollectionService = game:GetService("CollectionService")
 
 -- Modules
-local enemyTypes = require(ServerScriptService.EnemieAI:WaitForChild("enemyTypes"))
-local playerStatsModule = require(ServerScriptService:WaitForChild("plrDataModule"))
-local genericFunctions = require(ServerScriptService.GenericFunctions)
+local Modules = require(ServerScriptService.ModuleLoader)
+local enemyTypes = Modules.Get("EnemyTypes")
+local playerStatsModule = Modules.Get("PlayerData")
+local genericFunctions = Modules.Get("GenericFunctions")
 
 -- Constants
 local DEFAULT_CONFIG = {

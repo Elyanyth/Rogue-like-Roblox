@@ -60,9 +60,10 @@ local CONFIG = {
 }
 
 -- Modules
-local enemyTypes = require(ServerScriptService.EnemieAI:FindFirstChild("enemyTypes"))
-local BaseAi = require(ServerScriptService.EnemieAI:WaitForChild("BaseAi"))
-local genericFunctions = require(ServerScriptService.GenericFunctions)
+local Modules = require(ServerScriptService.ModuleLoader)
+local enemyTypes = Modules.Get("EnemyTypes")
+local BaseAi = Modules.Get("BaseEnemy")
+local genericFunctions = Modules.Get("GenericFunctions")
 
 -- Cache spawner properties
 local spawnerSize = CONFIG.Spawner.Size

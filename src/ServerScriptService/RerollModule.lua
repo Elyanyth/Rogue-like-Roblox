@@ -1,8 +1,8 @@
 local RerollModule = {}
 
 local ServerScriptService = game:GetService("ServerScriptService")
-
-WaveModule = require(ServerScriptService.WaveModule)
+local Modules = require(ServerScriptService.ModuleLoader)
+local WaveModule = Modules.Get("WaveModule")
 
 
 function RerollModule.BasePrice() 

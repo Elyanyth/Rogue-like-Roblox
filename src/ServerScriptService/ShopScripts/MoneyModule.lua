@@ -1,15 +1,16 @@
 local MoneyModule = {}
 
 -- Services
-ReplicatedStorage = game:GetService("ReplicatedStorage")
-ServerStorage = game:GetService("ServerStorage")
-ServerScriptService = game:GetService("ServerScriptService")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
+
+-- Modules
+local Modules = require(ServerScriptService.ModuleLoader)
+local PlayerDataModule = Modules.Get("PlayerData")
 
 -- Events
-MoneyEvent = ReplicatedStorage:WaitForChild("MoneyEvent")
-
--- Requirements
-PlayerDataModule = require(ServerScriptService.plrDataModule)
+local MoneyEvent = ReplicatedStorage:WaitForChild("MoneyEvent")
 
 
 function MoneyModule.Get(Player)

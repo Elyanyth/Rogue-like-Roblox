@@ -23,6 +23,7 @@
 local Players = game:GetService("Players")
 local ServerStorage = game:GetService("ServerStorage")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerScriptService = game:GetService("ServerScriptService")
 
 -- Events
 local playerDataEvent = ServerStorage:FindFirstChild("PlayerDataEvent")
@@ -34,7 +35,8 @@ if not playerDataEvent then
 end
 
 -- Modules
-local playerDataModule = require(game.ServerScriptService:WaitForChild("plrDataModule"))
+local Modules = require(ServerScriptService.ModuleLoader)
+local playerDataModule = Modules.Get("PlayerData")
 
 
 local function CreateStats(player, folder)

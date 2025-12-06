@@ -49,7 +49,8 @@ local LootEvent = ReplicatedStorage:WaitForChild("LootEvent")
 
 
 -- Modules 
-local lootTable = require(ServerScriptService.ShopScripts.LootTable)
+local Module = require(ServerScriptService:WaitForChild("ModuleLoader"))
+local lootTable = Module.Get("LootTable")
 
 -- Loot table configuration
 -- Consider moving this to a ModuleScript if it gets large

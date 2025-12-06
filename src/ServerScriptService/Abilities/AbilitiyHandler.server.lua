@@ -31,16 +31,17 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerStorage = game:GetService("ServerStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
--- RemoteEvent for client → server
+-- Modules
+local Modules = require(ServerScriptService.ModuleLoader)
+local playerStatsModule = Modules.Get("PlayerData")
+
+-- RemoteEvent for client  server
 local AbilityEvent = ReplicatedStorage:FindFirstChild("AbilityEvent") or Instance.new("RemoteEvent")
 AbilityEvent.Name = "AbilityEvent"
 AbilityEvent.Parent = ReplicatedStorage
 
 -- Folder containing all module abilities
 local AbilityFolder = ServerScriptService:WaitForChild("Abilities")
-
--- Modules
-local playerStatsModule = require(ServerScriptService:WaitForChild("plrDataModule"))
 
 -- Table to track cooldowns per player
 local cooldowns = {}

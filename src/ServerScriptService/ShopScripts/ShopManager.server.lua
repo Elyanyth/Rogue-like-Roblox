@@ -41,11 +41,9 @@ local SelectionEvent = ReplicatedStorage:WaitForChild("SelectionEvent")
 local Modules = require(ServerScriptService.ModuleLoader)
 local LootModule = Modules.Get("LootModule")
 local MoneyModule = Modules.Get("MoneyModule")
-
-local PlayerDataModule = require(ServerScriptService.plrDataModule)
--- local MoneyModule = require(ServerScriptService.MoneyModule)
-local WaveModule = require(ServerScriptService.WaveModule)
--- local RerollModule = require(ServerScriptService.RerollModule) -- Unused, consider removing
+local PlayerDataModule = Modules.Get("PlayerData")
+local WaveModule = Modules.Get("WaveModule")
+-- local RerollModule = Modules.Get("RerollModule") -- Unused, consider enabling if needed
 
 -- Configuration
 local CONFIG = {
