@@ -54,8 +54,9 @@ local CONFIG = {
 	MaxEnemyCount = 75,
 	MinPlayerDistance = 15, -- Minimum distance from players to spawn
 	MaxSpawnAttempts = 10,
-	SpawnJitter = 5, -- Random position offset range
-	PackSpawnDelay = 0.1,
+	SpawnJitter = 3, -- Random position offset range
+	PackSpawnDelay = 1, -- time in between packs
+	enemySpawnInterval = 0.2 -- time between enemys in the same pack
 }
 
 -- Modules
@@ -69,9 +70,16 @@ local spawnerTopY = CONFIG.Spawner.Position.Y + (spawnerSize.Y / 2)
 
 -- Utility Functions
 local function waitForPlayers()
-	while #Players:GetPlayers() < 1 do
-		task.wait(0.5)
+	local ok, err = pcall(function()
+    while #Players:GetPlayers() < 1 do
+        task.wait(0.5)
+    end
+	end)
+
+	if not ok then
+		warn("waitForPlayers error:", err)
 	end
+
 end
 
 local function getRandomPosition()
@@ -147,23 +155,29 @@ local function spawnEnemyPack(enemyType)
 		end
 		
 		spawnSingleEnemy(enemyType, baseX, baseZ)
-		task.wait(CONFIG.PackSpawnDelay)
+		task.wait(CONFIG.enemySpawnInterval)
 	end
+	task.wait(CONFIG.PackSpawnDelay)
 end
 
 -- Main Spawning Loop
 local function runSpawner()
 	waitForPlayers()
 	
-	while true do
-		-- Only spawn if below capacity
-		if getCurrentEnemyCount() < CONFIG.MaxEnemyCount then
-			local enemyType = enemyTypes.getWeightedRandomType()
-			spawnEnemyPack(enemyType)
+	local ok, err = pcall(function()
+        while true do 
+			if getCurrentEnemyCount() < CONFIG.MaxEnemyCount then
+				local enemyType = enemyTypes.getWeightedRandomType()
+				spawnEnemyPack(enemyType)
+			end
 		end
-		
-		task.wait(CONFIG.SpawnInterval)
-	end
+    end)
+
+    if not ok then
+        warn("Spawner loop error:", err)
+    end
+
+    task.wait(CONFIG.SpawnInterval)
 end
 
 -- Start the spawner
