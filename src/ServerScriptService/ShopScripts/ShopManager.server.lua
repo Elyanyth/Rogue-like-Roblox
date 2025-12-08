@@ -101,6 +101,22 @@ local function applySpellReward(playerAbilities, lootItem)
 	spellObject.Value = spellObject.Value + lootItem.amount
 end
 
+local function applyItemReward(playerItems, lootItem)
+	local Item = playerItems:FindFirstChild(lootItem.id)
+
+	if not Item then 
+		-- Create new spell/ability
+		Item = Instance.new("IntValue")
+		Item.Name = lootItem.id
+		Item.Value = 0
+		Item.Parent = playerItems
+	end
+
+	Item.Value = Item.Value + lootItem.amount
+
+end
+
+
 local function updatePlayerCharacter(player, playerStats)
 	local character = player.Character
 	if not character then return end
@@ -182,6 +198,7 @@ SelectionEvent.OnServerEvent:Connect(function(player, selectionIndex)
 
 	local playerStats = playerFolder:FindFirstChild("Stats")
 	local playerAbilities = playerFolder:FindFirstChild("Abilities")
+	local playerItems = playerFolder:FindFirstChild("Items")
 
 	if not playerStats or not playerAbilities then
 		warn("Stats or Abilities folder missing for", player.Name)
@@ -195,6 +212,8 @@ SelectionEvent.OnServerEvent:Connect(function(player, selectionIndex)
 		applyStatReward(playerStats, selectedLoot)
 	elseif selectedLoot.type == "spell" then
 		applySpellReward(playerAbilities, selectedLoot)
+	elseif selectedLoot.type == "item" then
+		applyItemReward(playerItems, selectedLoot)
 	else
 		warn("Unknown loot type:", selectedLoot.type)
 	end

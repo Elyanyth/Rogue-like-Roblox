@@ -20,10 +20,12 @@ local Modules = {
 	LootModule = ServerScriptService:WaitForChild("ShopScripts"):WaitForChild("LootModule"),
 	LootTable = ServerScriptService:WaitForChild("ShopScripts"):WaitForChild("LootTable"),
 	MoneyModule = ServerScriptService:WaitForChild("ShopScripts"):WaitForChild("MoneyModule"),
+	RerollModule = ServerScriptService:WaitForChild("ShopScripts"):WaitForChild("RerollModule"),
 	StatManager = ServerScriptService:WaitForChild("StatManager"),
-	WaveModule = ServerScriptService:WaitForChild("WaveModule"),
-	RerollModule = ServerScriptService:WaitForChild("RerollModule"),
 
+	
+	-- Wave Systems
+	WaveModule = ServerScriptService:WaitForChild("WaveModule"),
 
 	-- Combat Systems
 	BaseEnemy = ServerScriptService:WaitForChild("EnemieAI"):WaitForChild("BaseAi"),

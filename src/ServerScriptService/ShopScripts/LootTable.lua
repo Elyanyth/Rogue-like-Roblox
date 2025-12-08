@@ -19,12 +19,16 @@ lootTable.SPELLS = {
 	{ id = "Fireball", weight = 100, type = "spell", min = 1, max = 1 },
 }
 
+lootTable.ITEMS = {
+	{id = "Wizard Cap", weight = 100, type = "item", min = 1, max = 1 },
+}
+
 -- Helper to merge all or specific tables
 function lootTable.getMergedLoot(...)
 	local tablesToMerge = {...}
 	if #tablesToMerge == 0 then
 		-- Default: merge all
-		tablesToMerge = {lootTable.COMBAT_STATS, lootTable.UTILITY_STATS, lootTable.SPELLS}
+		tablesToMerge = {lootTable.COMBAT_STATS, lootTable.UTILITY_STATS, lootTable.SPELLS, lootTable.ITEMS}
 	end
 	
 	local result = {}

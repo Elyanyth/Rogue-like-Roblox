@@ -1,62 +1,137 @@
+--[[
+    Player Data Module
+
+    Purpose:
+        Manages player statistics and data stored in ServerStorage.
+        Provides utilities for fetching and organizing player stats.
+
+    Structure:
+        PlayerData is stored in ServerStorage under the format:
+        ServerStorage.PlayerData["PlayerName - UserID"].Stats
+
+    Usage:
+        local plrData = require(path.to.plrDataModule)
+        local stats = plrData.fetchPlrStatsTable(player)
+        print(stats.health, stats.strength)
+
+    Author: [Your Name]
+    Last Updated: [Date]
+--]]
+
 local plrDataModule = {}
 
-local serverStorage = game:GetService("ServerStorage")
+-- Services
+local ServerStorage = game:GetService("ServerStorage")
 
+-- Type Definitions
 export type PlayerStats = {
-	health: number,
-	speed: number,
-	strength: number,
-	armor: number,
-	critRate: number,
-	critDamage: number,
-	healthRegen: number,
-	cooldownReduction: number,
+    health: number,
+    speed: number,
+    strength: number,
+    armor: number,
+    critRate: number,        -- Percentage (0-100)
+    critDamage: number,      -- Percentage multiplier (e.g., 125 = 1.25x damage)
+    healthRegen: number,     -- Health regenerated per tick/second
+    cooldownReduction: number, -- Percentage (0-100)
+    Income: number,          -- Income per interval
+    Money: number,           -- Current money
 }
 
--- Default stats table in correct Lua format
+-- Default player statistics (used when creating new player data)
 plrDataModule.DefaultStats = {
-	health = 100,
-	speed = 20,
-	strength = 0,
-	armor = 0,
-	critRate = 0, -- percentage (0-100)
-	critDamage = 125,
-	healthRegen = 0,
-	cooldownReduction = 0,
-	Income = 20, 
-	Money = 20
+    health = 100,
+    speed = 20,
+    strength = 0,
+    armor = 0,
+    critRate = 0,
+    critDamage = 125,
+    healthRegen = 0,
+    cooldownReduction = 0,
+    Income = 20,
+    Money = 20
 }
 
-function plrDataModule.getPlayerFolder(player)
-	local playerFolder = serverStorage.PlayerData:FindFirstChild(player.Name .. " - " .. player.UserId)
-	return playerFolder
+--[[
+    Retrieves a player's data folder from ServerStorage
+    @param player Player - The player instance
+    @return Folder | nil - The player's data folder, or nil if not found
+]]
+function plrDataModule.getPlayerFolder(player: Player): Folder?
+    if not player then
+        warn("getPlayerFolder: Invalid player provided")
+        return nil
+    end
+
+    local folderName = player.Name .. " - " .. player.UserId
+    local playerFolder = ServerStorage.PlayerData:FindFirstChild(folderName)
+
+    if not playerFolder then
+        warn("getPlayerFolder: Folder not found for", player.Name)
+    end
+
+    return playerFolder
 end
 
-function plrDataModule.fetchPlrData(player)
-	local playerData = plrDataModule.getPlayerFolder(player)
-	return playerData:GetChildren()
+--[[
+    Fetches all children from a player's data folder
+    @param player Player - The player instance
+    @return {Instance} - Array of all instances in the player's folder
+]]
+function plrDataModule.fetchPlrData(player: Player): {Instance}
+    local playerFolder = plrDataModule.getPlayerFolder(player)
+
+    if not playerFolder then
+        return {}
+    end
+
+    return playerFolder:GetChildren()
 end
-	
-function plrDataModule.fetchPlrStats(player)
-	local playerData = plrDataModule.getPlayerFolder(player)
-	local PlayerStats = playerData.Stats
-	return PlayerStats
+
+--[[
+    Retrieves the Stats folder from a player's data
+    @param player Player - The player instance
+    @return Folder | nil - The player's Stats folder
+]]
+function plrDataModule.fetchPlrStats(player: Player): Folder?
+    local playerFolder = plrDataModule.getPlayerFolder(player)
+
+    if not playerFolder then
+        return nil
+    end
+
+    local statsFolder = playerFolder:FindFirstChild("Stats")
+
+    if not statsFolder then
+        warn("fetchPlrStats: Stats folder not found for", player.Name)
+    end
+
+    return statsFolder
 end
 
-function plrDataModule.fetchPlrStatsTable(player)
-	
-	local playerStats = plrDataModule.fetchPlrStats(player)
+--[[
+    Converts player stats from Instance format to a dictionary table
+    @param player Player - The player instance
+    @return PlayerStats - Dictionary table with stat names as keys and values
+]]
+function plrDataModule.fetchPlrStatsTable(player: Player): PlayerStats
+    local playerStats = plrDataModule.fetchPlrStats(player)
 
-	-- Create a table with Name = Value for each IntValue
-	local StatsTable = {}
-	for _, stat in ipairs(playerStats:GetChildren()) do
-		if stat:IsA("IntValue") then
-			StatsTable[stat.Name] = stat.Value
-		end
-	end
+    -- Return empty/default table if stats not found
+    if not playerStats then
+        warn("fetchPlrStatsTable: Could not fetch stats for", player.Name)
+        return table.clone(plrDataModule.DefaultStats)
+    end
 
-	return StatsTable
+    -- Build stats dictionary from IntValue children
+    local statsTable = {}
+
+    for _, stat in playerStats:GetChildren() do
+        if stat:IsA("IntValue") or stat:IsA("NumberValue") then
+            statsTable[stat.Name] = stat.Value
+        end
+    end
+
+    return statsTable
 end
 
 return plrDataModule
-
