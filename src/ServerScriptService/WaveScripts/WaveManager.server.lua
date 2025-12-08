@@ -29,14 +29,17 @@ end
 local Modules = require(ServerScriptService.ModuleLoader)
 local LootModule = Modules.Get("LootModule")
 local MoneyModule = Modules.Get("MoneyModule")
-local StatManager = Modules.Get("StatManager")
 local WaveModule = Modules.Get("WaveModule")
 local RerollModule = Modules.Get("RerollModule")
+local ReadyCheck = Modules.Get("ReadyCheck")
+local MobSpawner = Modules.Get("MobSpawner")
+
+-- local StatManager = Modules.Get("StatManager")
 --local LootModule = require(game.ServerScriptService:WaitForChild("LootModule"))
 
 
 local function ClearMap()
-	MobSpawner.Disabled = true
+	-- MobSpawner.Disabled = true
 	for _, obj in ipairs(workspace:GetDescendants()) do
 		if obj:IsA("Humanoid") then
 			-- Check if this Humanoid belongs to a player
@@ -52,20 +55,30 @@ end
 
 local timerLength = script:GetAttribute("Timer") or 20
 local timeLeft = timerLength
+local readyCheck = ReadyCheck.new()
+
 
 while true do
+	
+	-- print("Timer finished, restarting...")
+	print("Wave " .. WaveModule.Get() .. " starting...")
+
+	nextWaveEvent:FireAllClients(WaveModule.Get())
+	readyCheck:WaitForAllReady()
+	MobSpawner.Start()
+
 	--timerLength = math.clamp(timerLength + ((waveCount-1) * 5), 20, 90) -- Gradually increase timer
 	timeLeft = timerLength
 	while timeLeft > 0 do
 		-- Send the current time to all clients
 		timerEvent:FireAllClients(timeLeft)
-		wait(1)
+		task.wait(1)
 		timeLeft -= 1
 	end
 
 	-- Optional: tell clients the timer ended	
 	
-
+	MobSpawner.Stop()
 	
 	ClearMap()
 	
@@ -88,13 +101,10 @@ while true do
 	end
 	
 	-- Wait for the player to click "Next"
-	nextWaveEvent.OnServerEvent:Wait()
-	MobSpawner.Disabled = false
+	-- nextWaveEvent.OnServerEvent:Wait()
+	-- MobSpawner.Disabled = false
 	
 	WaveModule.Increase()
-	nextWaveEvent:FireAllClients(WaveModule.Get())
-	print("Timer finished, restarting...")
-	print("Wave " .. WaveModule.Get() .. " starting...")
 end
 
 

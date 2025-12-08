@@ -42,6 +42,8 @@
 	- Enemy count cap maintains server performance
 --]]
 
+local MobSpawner = {}
+
 local ServerScriptService = game:GetService("ServerScriptService")
 local ServerStorage = game:GetService("ServerStorage")
 local CollectionService = game:GetService("CollectionService")
@@ -185,7 +187,22 @@ local function runSpawner()
 end
 
 -- Start the spawner
-local success, err = pcall(runSpawner)
-if not success then
-	warn("Spawner error:", err)
+function MobSpawner.Start()
+    -- Run the spawner loop on its own thread so callers don't get blocked
+    MobSpawner = task.spawn(function()
+        local success, err = pcall(runSpawner)
+        if not success then
+            warn("Spawner error:", err)
+        end
+    end)
 end
+
+function MobSpawner.Stop()
+    -- Run the spawner loop on its own thread so callers don't get blocked
+    if MobSpawner then
+		task.cancel(MobSpawner) -- Cancels the spawned task
+		MobSpawner = nil
+	end
+end
+
+return MobSpawner
