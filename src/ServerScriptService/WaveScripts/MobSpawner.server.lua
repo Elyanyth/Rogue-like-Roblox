@@ -125,7 +125,7 @@ local function spawnSingleEnemy(enemyType, baseX, baseZ)
 			return false
 		end
 		
-		local enemyScript = ServerScriptService.EnemieAI.EnemyScript:Clone()
+		local enemyScript = ServerScriptService.EnemyScripts.EnemyScript:Clone()
 		enemyScript.Parent = entity
 		
 		local spawnCFrame = createSpawnPosition(offsetX, offsetZ, entity.PrimaryPart.Size.Y)

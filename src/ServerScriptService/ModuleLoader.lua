@@ -14,7 +14,7 @@ local folders = {
 -- Define all module paths in one place
 local Modules = {
 	-- Player Systems
-	PlayerData = ServerScriptService:WaitForChild("plrDataModule"),
+	PlayerData = ServerScriptService:WaitForChild("PlayerManegmentScripts"):WaitForChild("plrDataModule"),
 	
     -- Shop Systems
 	LootModule = ServerScriptService:WaitForChild("ShopScripts"):WaitForChild("LootModule"),
@@ -28,8 +28,8 @@ local Modules = {
 	WaveModule = ServerScriptService:WaitForChild("WaveScripts"):WaitForChild("WaveModule"),
 
 	-- Combat Systems
-	BaseEnemy = ServerScriptService:WaitForChild("EnemieAI"):WaitForChild("BaseAi"),
-	EnemyTypes = ServerScriptService:WaitForChild("EnemieAI"):WaitForChild("enemyTypes"),
+	BaseEnemy = ServerScriptService:WaitForChild("EnemyScripts"):WaitForChild("BaseAi"),
+	EnemyTypes = ServerScriptService:WaitForChild("EnemyScripts"):WaitForChild("enemyTypes"),
 	DamageModule = ServerScriptService:WaitForChild("DamageModule"),
 
 	-- Utilities
