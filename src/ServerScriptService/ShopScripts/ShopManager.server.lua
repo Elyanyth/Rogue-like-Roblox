@@ -177,8 +177,3 @@ SelectionEvent.OnServerEvent:Connect(function(player, selectionIndex)
 	-- Clear the player's loot data
 	LootModule.RemovePlayerLoot(player)
 end)
-
--- Cleanup
-Players.PlayerRemoving:Connect(function(player)
-	RerollCounts[player.UserId] = nil
-end)

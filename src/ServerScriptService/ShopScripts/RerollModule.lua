@@ -131,6 +131,10 @@ function RerollModule.Reroll(player)
 	RerollEvent:FireClient(player, price + CONFIG.RerollPriceIncrement)
 end
 
+function RerollModule.Cleanup(player)
+	RerollCounts[player.UserId] = nil
+end
+
 -- Alias for backwards compatibility (if needed)
 RerollModule.BasePrice = RerollModule.GetBasePrice
 
