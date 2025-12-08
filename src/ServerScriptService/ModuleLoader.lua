@@ -30,6 +30,7 @@ local Modules = {
 	-- Combat Systems
 	BaseEnemy = ServerScriptService:WaitForChild("EnemyScripts"):WaitForChild("BaseAi"),
 	EnemyTypes = ServerScriptService:WaitForChild("EnemyScripts"):WaitForChild("enemyTypes"),
+	DifficultyModule = ServerScriptService:WaitForChild("EnemyScripts"):WaitForChild("DifficultyModule"),
 	DamageModule = ServerScriptService:WaitForChild("DamageModule"),
 
 	-- Utilities
