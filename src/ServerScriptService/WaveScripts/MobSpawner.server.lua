@@ -64,6 +64,7 @@ local Modules = require(ServerScriptService.ModuleLoader)
 local enemyTypes = Modules.Get("EnemyTypes")
 local BaseAi = Modules.Get("BaseEnemy")
 local genericFunctions = Modules.Get("GenericFunctions")
+local DifficultyModule = Modules.Get("DifficultyModule")
 
 -- Cache spawner properties
 local spawnerSize = CONFIG.Spawner.Size
@@ -134,7 +135,9 @@ local function spawnSingleEnemy(enemyType, baseX, baseZ)
 		-- Validate spawn location
 		if isValidSpawnLocation(entity) then
 			entity.Parent = workspace.Enemies
-			BaseAi.Active(entity, enemyType)
+			local scaledStats = DifficultyModule.ScaleEnemyStats(enemyType)
+			-- print(scaledStats)
+			BaseAi.Active(entity, scaledStats)
 			return true
 		else
 			entity:Destroy()

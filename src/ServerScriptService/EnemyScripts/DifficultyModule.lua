@@ -208,7 +208,7 @@ function DifficultyModule.ScaleStat(statName: string, baseStat: number, wave: nu
     end
     
     if type(wave) ~= "number" or wave < 1 then
-        wave = 1
+        wave = WaveModule.Get()
     end
     
     -- Get scaling config for this stat
