@@ -25,7 +25,7 @@ local Modules = {
 
 	
 	-- Wave Systems
-	WaveModule = ServerScriptService:WaitForChild("WaveModule"),
+	WaveModule = ServerScriptService:WaitForChild("WaveScripts"):WaitForChild("WaveModule"),
 
 	-- Combat Systems
 	BaseEnemy = ServerScriptService:WaitForChild("EnemieAI"):WaitForChild("BaseAi"),

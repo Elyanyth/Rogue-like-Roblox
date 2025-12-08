@@ -8,7 +8,7 @@ local nextWaveEvent = ReplicatedStorage:FindFirstChild("NextWave")
 local timerEvent = ReplicatedStorage:FindFirstChild("TimerUpdate")
 local RerollEvent = ReplicatedStorage:FindFirstChild("RerollEvent")
 
-local MobSpawner = ServerScriptService:WaitForChild("Mob Spawner")
+local MobSpawner = ServerScriptService:WaitForChild("WaveScripts"):WaitForChild("MobSpawner")
 
 if not nextWaveEvent then
 	nextWaveEvent = Instance.new("RemoteEvent")

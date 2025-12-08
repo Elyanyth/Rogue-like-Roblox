@@ -43,6 +43,7 @@ local LootModule = Modules.Get("LootModule")
 local MoneyModule = Modules.Get("MoneyModule")
 local PlayerDataModule = Modules.Get("PlayerData")
 local WaveModule = Modules.Get("WaveModule")
+local RerollModule = Modules.Get("RerollModule")
 -- local RerollModule = Modules.Get("RerollModule") -- Unused, consider enabling if needed
 
 -- Configuration
@@ -57,21 +58,6 @@ local RerollCounts = {} -- Store reroll counts per player (by UserId)
 local CurrentWave = nil
 
 -- Utility Functions
-local function getRerollPrice(wave, rerollCount)
-	return CONFIG.RerollBasePrice * (wave + rerollCount)
-end
-
-local function resetRerollCountsIfNewWave()
-	local currentWave = WaveModule.Get()
-
-	if CurrentWave ~= currentWave then
-		-- New wave detected - reset all reroll counts
-		for userId in pairs(RerollCounts) do
-			RerollCounts[userId] = 0
-		end
-		CurrentWave = currentWave
-	end
-end
 
 local function getPlayerFolder(player)
 	return ServerStorage.PlayerData:FindFirstChild(player.Name .. " - " .. player.UserId)
@@ -132,40 +118,7 @@ end
 
 -- Event Handlers
 RerollEvent.OnServerEvent:Connect(function(player)
-	resetRerollCountsIfNewWave()
-
-	local userId = player.UserId
-
-	-- Initialize reroll count for new players
-	if not RerollCounts[userId] then
-		RerollCounts[userId] = 0
-	end
-
-	-- Calculate reroll price
-	local price = getRerollPrice(WaveModule.Get(), RerollCounts[userId])
-
-	-- Check if player can afford reroll
-	local playerStats = PlayerDataModule.fetchPlrStats(player)
-	if not playerStats or not playerStats.Money then
-		warn("Player stats not found for", player.Name)
-		return
-	end
-
-	if playerStats.Money.Value < price then
-		-- Not enough money - could send feedback to client
-		return
-	end
-
-	-- Process reroll
-	MoneyModule.Remove(player, price)
-	RerollCounts[userId] = RerollCounts[userId] + 1
-
-	-- Generate new loot
-	local playerLoot = LootModule.GenerateReward(player, CONFIG.LootRollsPerReroll)
-
-	-- Send updated data to client
-	LootEvent:FireClient(player, playerLoot)
-	RerollEvent:FireClient(player, price + CONFIG.RerollPriceIncrement)
+	RerollModule.Reroll(player)
 end)
 
 MoneyEvent.OnServerEvent:Connect(function(player, action)
