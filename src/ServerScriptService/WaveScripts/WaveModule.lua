@@ -41,5 +41,8 @@ function WaveModule.Ended(Time)
 	
 end
 
+function WaveModule.Reset()
+	Wave = 1
+end
 
 return WaveModule

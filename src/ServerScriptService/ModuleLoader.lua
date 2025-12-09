@@ -28,6 +28,8 @@ local Modules = {
 	WaveModule = ServerScriptService:WaitForChild("WaveScripts"):WaitForChild("WaveModule"),
 	ReadyCheck = ServerScriptService:WaitForChild("GameScripts"):WaitForChild("ReadyCheck"),
 	MobSpawner = ServerScriptService:WaitForChild("WaveScripts"):WaitForChild("MobSpawner"),
+	GameControler = ServerScriptService:WaitForChild("WaveScripts"):WaitForChild("GameControler"),
+
 
 	-- Combat Systems
 	BaseEnemy = ServerScriptService:WaitForChild("EnemyScripts"):WaitForChild("BaseAi"),

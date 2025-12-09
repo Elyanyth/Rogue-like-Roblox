@@ -1,7 +1,6 @@
 -- ReadyCheck Module
 local ReadyCheck = {}
 ReadyCheck.__index = ReadyCheck
-
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
@@ -21,18 +20,18 @@ function ReadyCheck.new()
 	local self = setmetatable({}, ReadyCheck)
 	self.readyPlayers = {} -- [player] = true when ready
 	self.readyEvent = getReadyEvent()
-
+	
 	-- Reset ready state if a player leaves
 	Players.PlayerRemoving:Connect(function(player)
 		self.readyPlayers[player] = nil
 	end)
-
+	
 	-- Listen for players sending ready
 	self.readyEvent.OnServerEvent:Connect(function(player)
 		self.readyPlayers[player] = true
 		print(player.Name .. " is ready!")
 	end)
-
+	
 	return self
 end
 
@@ -43,8 +42,7 @@ function ReadyCheck:AllPlayersReady()
 			return false
 		end
 	end
-    self.readyPlayers = {}
-	return true
+	return true  -- Moved the reset logic out of here
 end
 
 -- Wait until all players are ready
@@ -53,15 +51,19 @@ function ReadyCheck:WaitForAllReady()
 	while #Players:GetPlayers() == 0 do
 		task.wait(0.5)
 	end
-
+	
 	-- Wait until all players are ready
 	repeat
 		task.wait(0.2)
 	until self:AllPlayersReady()
-
+	
 	print("All players are ready.")
-
+	
 	-- Reset ready states for next round
+	self:Reset()
+end
+
+function ReadyCheck:Reset()
 	self.readyPlayers = {}
 end
 

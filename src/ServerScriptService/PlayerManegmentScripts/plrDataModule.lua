@@ -134,4 +134,27 @@ function plrDataModule.fetchPlrStatsTable(player: Player): PlayerStats
     return statsTable
 end
 
+function plrDataModule.StatReset(player: Player)
+    local statsFolder = plrDataModule.fetchPlrStats(player)
+
+    if not statsFolder then
+        warn("StatReset: Stats folder not found for", player and player.Name)
+        return
+    end
+
+    -- Reset each stat in the Stats folder back to its default value (if defined)
+    for statName, defaultValue in pairs(plrDataModule.DefaultStats) do
+        local statObject = statsFolder:FindFirstChild(statName)
+
+        if statObject and (statObject:IsA("IntValue") or statObject:IsA("NumberValue")) then
+            statObject.Value = defaultValue
+        else
+            -- Optional: warn if a default stat is missing in the folder
+            if not statObject then
+                warn("StatReset: Missing stat '" .. statName .. "' in Stats folder for", player.Name)
+            end
+        end
+    end
+end
+
 return plrDataModule
