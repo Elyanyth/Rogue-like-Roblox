@@ -78,7 +78,7 @@ end)
 
 -- Cycle UI 
 
-local uiList = {shopGui.Shop, shopGui.Inventory}
+local uiList = {shopGui.Shop, shopGui.Inventory, shopGui.AbilitiesInventory}
 local cycleLeft = shopGui.CycleLeft
 local cycleRight = shopGui.CycleRight
 local currentUI = 1

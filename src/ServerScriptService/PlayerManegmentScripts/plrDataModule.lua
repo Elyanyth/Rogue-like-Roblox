@@ -157,6 +157,8 @@ function plrDataModule.StatReset(player: Player)
     end
 end
 
+-- Player Items Manager
+
 function plrDataModule.GetItemList(Player: Player): table
     local ItemTable = {}
     local PlayerFolder = plrDataModule.getPlayerFolder(Player)
