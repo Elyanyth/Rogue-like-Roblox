@@ -3,12 +3,17 @@ local Template = {}
 
 ServerStorage = game:GetService("ServerStorage")
 ServerScriptService = game:GetService("ServerScriptService")
+
+-- Modules
+local Modules = require(ServerScriptService:WaitForChild("ModuleLoader"))
 local damageModule = require(ServerScriptService.DamageModule)
+local PlayerData =  Modules.Get("PlayerData")
 
 local baseCooldown = 5 -- seconds
 
 function Template.Activate(player, mousePos, stats)
 	print(player.Name .. " used Fireball!")
+	
 	
 	Template.Cooldown = baseCooldown * (math.clamp(1 - (stats.cooldownReduction/100), 0.5, 1))
 	
@@ -17,13 +22,23 @@ function Template.Activate(player, mousePos, stats)
 	local root = character and character:FindFirstChild("HumanoidRootPart")
 	
 	-- Fireball code
+
+	local WizardCaps = PlayerData.GetItem(player, "Wizard Cap")
+	
 	local part = ServerStorage.Abilities:FindFirstChild("Fireball"):Clone()
+	
+	local multiplier = 1 + (1 - (WizardCaps / 10))
+
+	if typeof(multiplier) == "number" and multiplier > 0 then
+		part.Size = part.Size * multiplier
+	end
+	
 	part.CFrame = CFrame.new(root.CFrame.Position, Vector3.new(mousePos.Position.X, root.Position.Y, mousePos.Position.Z)) * CFrame.new(0, 0, -5)
 	part.Parent = workspace
 	local forward = part.CFrame.LookVector
 	local mass = part:GetMass()
 	
-	local baseDamage = 50
+	local baseDamage = 50 
 	local damage = damageModule.CalculateDamage(baseDamage, stats)
 
 	-- BodyVelocity

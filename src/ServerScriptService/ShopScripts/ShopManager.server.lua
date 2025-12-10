@@ -37,6 +37,10 @@ local LootEvent = ReplicatedStorage:WaitForChild("LootEvent")
 local MoneyEvent = ReplicatedStorage:WaitForChild("MoneyEvent")
 local SelectionEvent = ReplicatedStorage:WaitForChild("SelectionEvent")
 
+local ItemsAddedEvent = ReplicatedStorage:FindFirstChild("ItemsAddedEvent") or Instance.new("RemoteEvent")
+ItemsAddedEvent.Name = "ItemsAddedEvent"
+ItemsAddedEvent.Parent = ReplicatedStorage
+
 -- Modules
 local Modules = require(ServerScriptService.ModuleLoader)
 local LootModule = Modules.Get("LootModule")
@@ -87,18 +91,21 @@ local function applySpellReward(playerAbilities, lootItem)
 	spellObject.Value = spellObject.Value + lootItem.amount
 end
 
-local function applyItemReward(playerItems, lootItem)
-	local Item = playerItems:FindFirstChild(lootItem.id)
+local function applyItemReward(Player, ItemFolder, lootItem)
+	local Item = ItemFolder:FindFirstChild(lootItem.id)
 
 	if not Item then 
 		-- Create new spell/ability
 		Item = Instance.new("IntValue")
 		Item.Name = lootItem.id
 		Item.Value = 0
-		Item.Parent = playerItems
+		Item.Parent = ItemFolder
 	end
 
 	Item.Value = Item.Value + lootItem.amount
+
+	local ItemList = PlayerDataModule.GetItemList(Player)
+	ItemsAddedEvent:FireClient(Player, ItemList)
 
 end
 
@@ -166,7 +173,7 @@ SelectionEvent.OnServerEvent:Connect(function(player, selectionIndex)
 	elseif selectedLoot.type == "spell" then
 		applySpellReward(playerAbilities, selectedLoot)
 	elseif selectedLoot.type == "item" then
-		applyItemReward(playerItems, selectedLoot)
+		applyItemReward(player, playerItems, selectedLoot)
 	else
 		warn("Unknown loot type:", selectedLoot.type)
 	end

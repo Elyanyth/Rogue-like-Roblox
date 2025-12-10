@@ -157,4 +157,31 @@ function plrDataModule.StatReset(player: Player)
     end
 end
 
+function plrDataModule.GetItemList(Player: Player): table
+    local ItemTable = {}
+    local PlayerFolder = plrDataModule.getPlayerFolder(Player)
+    local ItemFolder = PlayerFolder:FindFirstChild("Items")
+
+    for _, item in pairs(ItemFolder:GetChildren()) do 
+        local itemName = item.Name
+        local itemAmount = item.Value
+        
+        ItemTable[itemName] = itemAmount
+        
+    end
+    
+    return ItemTable
+end
+
+function plrDataModule.GetItem(Player: Player, TargetItem)
+
+    local ItemList = plrDataModule.GetItemList(Player)
+
+    if ItemList[TargetItem] then 
+        return ItemList[TargetItem]
+    end
+
+
+end
+
 return plrDataModule
