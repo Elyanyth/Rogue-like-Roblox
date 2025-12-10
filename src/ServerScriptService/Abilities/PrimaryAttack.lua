@@ -1,88 +1,52 @@
- -- ServerStorage/Abilities/Fireball.lua
-local Template = {}
+-- ServerStorage/Abilities/Fireball.lua
+local ServerScriptService = game:GetService("ServerScriptService")
+local ServerStorage = game:GetService("ServerStorage")
+local Players = game:GetService("Players")
+local Debris = game:GetService("Debris")
 
-ServerStorage = game:GetService("ServerStorage")
-ServerScriptService = game:GetService("ServerScriptService")
-RunService = game:GetService("RunService")
-local damageModule = require(ServerScriptService.DamageModule)
+local Modules = require(ServerScriptService:WaitForChild("ModuleLoader"))
+local BaseSpell = Modules.Get("BaseAbility")
+local damageModule = Modules.Get("DamageModule")
+local PlayerData = Modules.Get("PlayerData")
 
-local baseCooldown = 0.5 -- seconds
+-- Setup config for this spell
+local PrimaryAttack = BaseSpell.new({
+    Name = "PrimaryAttack",
+    ModelName = "PrimaryAttack",
+    BaseDamage = 20,
+    BaseCooldown = 0.5,
+    DebrisTimer = 0.25
+})
 
-function Template.Activate(player, mousePos, stats)
-	--print(player.Name .. " used auto attack!")
-	
-	Template.Cooldown = baseCooldown * (math.clamp(1 - (stats.cooldownReduction/100), 0.5, 1))
-	
-	local Players = game:GetService("Players")
-	local character = player.Character
-	local root = character and character:FindFirstChild("HumanoidRootPart")
-	
-	-- Auto Attack code
-	local part = ServerStorage.Abilities:FindFirstChild("PrimaryAttack"):Clone()
-	part.CFrame = CFrame.new(root.CFrame.Position, Vector3.new(mousePos.Position.X, root.Position.Y, mousePos.Position.Z)) * CFrame.new(0, 0, -5)
-	part.Parent = workspace
-	local forward = part.CFrame.LookVector
-	local mass = part:GetMass()
-	
-	local baseDamage = 30
-	local damage = damageModule.CalculateDamage(baseDamage, stats)
+-- Override OnCast (unique Fireball behavior)
+function PrimaryAttack:OnCast(player, mousePos, stats, damage)
+    local character = player.Character
+    local root = character.HumanoidRootPart
 
-	-- Table to keep track of entities already hit
-	local hitEntities = {}
+    -- Spawn fireball projectile
+    local spawnCF = CFrame.new(
+        root.Position,
+        Vector3.new(mousePos.Position.X, root.Position.Y, mousePos.Position.Z)
+    ) * CFrame.new(0,0,-5)
 
-	--part.Touched:Connect(function(hit)
-	--	local character = hit.Parent
-	--	if character and character:FindFirstChild("Humanoid") then
-	--		-- Make sure we haven't already processed this character
-	--		if hitEntities[character] then
-	--			return
-	--		end
+    local part = self:SpawnAttack(self.ModelName, spawnCF)
 
-	--		-- Mark as hit
-	--		hitEntities[character] = true
+    -- Prevent multi-hit
+    local hitEntities = {}
 
-	--		local hum = character.Humanoid
-	--		local player = Players:GetPlayerFromCharacter(character)
+    part.Touched:Connect(function(hit)
+        local character = hit.Parent
+        if character and character:FindFirstChild("Humanoid") then
+            
+            if hitEntities[character] then return end
+            hitEntities[character] = true
 
-	--		if player then
-	--			print("Touched a player: " .. player.Name)
-	--			-- Additional player-specific logic here
-	--		else
-	--			hum.Health -= damage
-	--		end
-	--	end
-	--end)
-	
-	local hbConn
+            -- Use the BaseSpell hit logic
+            self:OnHit(hit, damage)
+        end
+    end)
 
-	hbConn = RunService.Heartbeat:Connect(function()
-		if not part or not part.Parent then
-			-- Part removed, stop the loop
-			hbConn:Disconnect()
-			return
-		end
-
-		local parts = workspace:GetPartBoundsInBox(part.CFrame, part.Size)
-
-		for _, hit in ipairs(parts) do
-			local character = hit.Parent
-			if character and character:FindFirstChild("Humanoid") and not hitEntities[character] then
-
-				hitEntities[character] = true
-
-				local hum = character.Humanoid
-				local player = Players:GetPlayerFromCharacter(character)
-
-				if player then
-					print("player hit")
-				else
-					hum:TakeDamage(damage)
-				end
-			end
-		end
-	end)	
-
-	game:GetService("Debris"):AddItem(part, 0.25)
+    Debris:AddItem(part, self.DebrisTimer)
 end
 
-return Template
+return PrimaryAttack

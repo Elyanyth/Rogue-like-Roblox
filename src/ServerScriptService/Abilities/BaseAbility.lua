@@ -20,6 +20,7 @@ function BaseSpell.new(config)
     self.ModelName = config.ModelName
     self.BaseDamage = config.BaseDamage or 0
     self.BaseCooldown = config.BaseCooldown or 1
+    self.DebrisTimer = config.DebrisTimer or 1
 
     return self
 end
@@ -39,6 +40,14 @@ function BaseSpell:SpawnProjectile(modelName, cframe, speed)
     bv.Velocity = part.CFrame.LookVector * speed
     bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
     bv.Parent = part
+
+    return part
+end
+
+function BaseSpell:SpawnAttack(modelName, cframe)
+    local part = ServerStorage.Abilities:FindFirstChild(modelName):Clone()
+    part.CFrame = cframe
+    part.Parent = workspace
 
     return part
 end

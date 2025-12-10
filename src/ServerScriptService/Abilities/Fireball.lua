@@ -15,6 +15,7 @@ local Fireball = BaseSpell.new({
     ModelName = "Fireball",
     BaseDamage = 50,
     BaseCooldown = 5,
+    DebrisTimer = 3
 })
 
 -- Override OnCast (unique Fireball behavior)
@@ -32,7 +33,7 @@ function Fireball:OnCast(player, mousePos, stats, damage)
         Vector3.new(mousePos.Position.X, root.Position.Y, mousePos.Position.Z)
     ) * CFrame.new(0,0,-5)
 
-    local part = self:SpawnProjectile("Fireball", spawnCF, 80)
+    local part = self:SpawnProjectile(self.ModelName, spawnCF, 80)
 
     -- Apply size multiplier
     if typeof(multiplier) == "number" and multiplier > 0 then
@@ -54,7 +55,7 @@ function Fireball:OnCast(player, mousePos, stats, damage)
         end
     end)
 
-    Debris:AddItem(part, 3)
+    Debris:AddItem(part, self.DebrisTimer)
 end
 
 return Fireball
