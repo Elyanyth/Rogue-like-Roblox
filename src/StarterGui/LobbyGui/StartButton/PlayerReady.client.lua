@@ -15,6 +15,9 @@ local lobbyGui = readyButton.Parent
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 
+readyButton.Active = true
+lobbyGui.Enabled = true
+
 readyButton.Activated:Connect(function()
     readyEvent:FireServer()
 
@@ -32,9 +35,4 @@ gameOverEvent.OnClientEvent:Connect(function()
 
 end)
 
-Players.PlayerAdded:Connect(function()
 
-    readyButton.Active = true
-    lobbyGui.Enabled = true
-
-end)

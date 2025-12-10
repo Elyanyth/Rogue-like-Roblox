@@ -89,7 +89,7 @@ AbilityEvent.OnServerEvent:Connect(function(player, abilityName, mousePos, spawn
 	task.spawn(function()
 		local stats = playerStatsModule.fetchPlrStatsTable(player)
 		local success, err = pcall(function()
-			ability.Activate(player, mousePos, stats)
+			ability:Activate(player, mousePos, stats)
 		end)
 		if not success then
 			warn("Error activating ability " .. abilityName .. ": " .. err)

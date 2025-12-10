@@ -40,6 +40,9 @@ local Modules = {
 	-- Utilities
 	GenericFunctions = ServerScriptService:WaitForChild("GenericFunctions"),
 	
+	-- Abilities 
+	BaseAbility = ServerScriptService:WaitForChild("Abilities"):WaitForChild("BaseAbility"),
+
 	-- Shared (ReplicatedStorage)
 	-- SharedUtils = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("SharedUtils"),
 }

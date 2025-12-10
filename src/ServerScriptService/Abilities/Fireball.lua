@@ -1,80 +1,60 @@
- -- ServerStorage/Abilities/Fireball.lua
-local Template = {}
+-- ServerStorage/Abilities/Fireball.lua
+local ServerScriptService = game:GetService("ServerScriptService")
+local ServerStorage = game:GetService("ServerStorage")
+local Players = game:GetService("Players")
+local Debris = game:GetService("Debris")
 
-ServerStorage = game:GetService("ServerStorage")
-ServerScriptService = game:GetService("ServerScriptService")
-
--- Modules
 local Modules = require(ServerScriptService:WaitForChild("ModuleLoader"))
-local damageModule = require(ServerScriptService.DamageModule)
-local PlayerData =  Modules.Get("PlayerData")
+local BaseSpell = Modules.Get("BaseAbility")
+local damageModule = Modules.Get("DamageModule")
+local PlayerData = Modules.Get("PlayerData")
 
-local baseCooldown = 5 -- seconds
+-- Setup config for this spell
+local Fireball = BaseSpell.new({
+    Name = "Fireball",
+    ModelName = "Fireball",
+    BaseDamage = 50,
+    BaseCooldown = 5,
+})
 
-function Template.Activate(player, mousePos, stats)
-	print(player.Name .. " used Fireball!")
-	
-	
-	Template.Cooldown = baseCooldown * (math.clamp(1 - (stats.cooldownReduction/100), 0.5, 1))
-	
-	local Players = game:GetService("Players")
-	local character = player.Character
-	local root = character and character:FindFirstChild("HumanoidRootPart")
-	
-	-- Fireball code
+-- Override OnCast (unique Fireball behavior)
+function Fireball:OnCast(player, mousePos, stats, damage)
+    local character = player.Character
+    local root = character.HumanoidRootPart
 
-	local WizardCaps = PlayerData.GetItem(player, "Wizard Cap")
-	
-	local part = ServerStorage.Abilities:FindFirstChild("Fireball"):Clone()
-	
-	local multiplier = 1 + (1 - (WizardCaps / 10))
+    -- Extra: scaling based on Wizard Cap
+    local WizardCaps = PlayerData.GetItem(player, "Wizard Cap") or 0
+    local multiplier = WizardCaps > 0 and math.max(1, 1 + (WizardCaps / 10)) or 1
 
-	if typeof(multiplier) == "number" and multiplier > 0 then
-		part.Size = part.Size * multiplier
-	end
-	
-	part.CFrame = CFrame.new(root.CFrame.Position, Vector3.new(mousePos.Position.X, root.Position.Y, mousePos.Position.Z)) * CFrame.new(0, 0, -5)
-	part.Parent = workspace
-	local forward = part.CFrame.LookVector
-	local mass = part:GetMass()
-	
-	local baseDamage = 50 
-	local damage = damageModule.CalculateDamage(baseDamage, stats)
+    -- Spawn fireball projectile
+    local spawnCF = CFrame.new(
+        root.Position,
+        Vector3.new(mousePos.Position.X, root.Position.Y, mousePos.Position.Z)
+    ) * CFrame.new(0,0,-5)
 
-	-- BodyVelocity
-	local bv = Instance.new("BodyVelocity", part)
-	local maxForce = math.huge
-	bv.Velocity = part.CFrame.LookVector * 80 -- speed
-	bv.MaxForce = Vector3.new(maxForce, maxForce, maxForce) -- make sure it can push in all directions
+    local part = self:SpawnProjectile("Fireball", spawnCF, 80)
 
+    -- Apply size multiplier
+    if typeof(multiplier) == "number" and multiplier > 0 then
+        part.Size = part.Size * multiplier
+    end
 
-	-- Table to keep track of entities already hit
-	local hitEntities = {}
+    -- Prevent multi-hit
+    local hitEntities = {}
 
-	part.Touched:Connect(function(hit)
-		local character = hit.Parent
-		if character and character:FindFirstChild("Humanoid") then
-			-- Make sure we haven't already processed this character
-			if hitEntities[character] then
-				return
-			end
+    part.Touched:Connect(function(hit)
+        local character = hit.Parent
+        if character and character:FindFirstChild("Humanoid") then
+            
+            if hitEntities[character] then return end
+            hitEntities[character] = true
 
-			-- Mark as hit
-			hitEntities[character] = true
+            -- Use the BaseSpell hit logic
+            self:OnHit(hit, damage)
+        end
+    end)
 
-			local hum = character.Humanoid
-			local player = Players:GetPlayerFromCharacter(character)
-
-			if player then
-				print("Touched a player: " .. player.Name)
-				-- Additional player-specific logic here
-			else
-				hum.Health -= damage
-			end
-		end
-	end)
-
-	game:GetService("Debris"):AddItem(part, 3)
+    Debris:AddItem(part, 3)
 end
 
-return Template
+return Fireball
