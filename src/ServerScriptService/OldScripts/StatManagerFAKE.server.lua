@@ -37,7 +37,7 @@ timerEvent.OnServerEvent:Connect(function(timeLeft)
 	end
 end)
 
-
+plrLootData = nil
 
 selectionEvent.OnServerEvent:Connect(function(player, selection)
 
