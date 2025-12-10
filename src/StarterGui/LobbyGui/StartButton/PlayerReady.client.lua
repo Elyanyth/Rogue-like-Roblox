@@ -1,4 +1,5 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
 
 local readyEvent = ReplicatedStorage:FindFirstChild("PlayerReady") or Instance.new("RemoteEvent")
 readyEvent.Name = "PlayerReady"
@@ -26,6 +27,13 @@ gameOverEvent.OnClientEvent:Connect(function()
     -- print("Game over event received!")
     
     readyButton.Text = "Restart"
+    readyButton.Active = true
+    lobbyGui.Enabled = true
+
+end)
+
+Players.PlayerAdded:Connect(function()
+
     readyButton.Active = true
     lobbyGui.Enabled = true
 

@@ -1,12 +1,15 @@
 -- Services
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local SocialService = game:GetService("SocialService")
+local StarterGui = game:GetService("StarterGui")
 
 -- Events 
 local ItemsAddedEvent = ReplicatedStorage:WaitForChild("ItemsAddedEvent")
 
 -- GUI
+local TemplateFolder = StarterGui.Templates
 local ScrollingFrame = script.Parent:FindFirstChild("ScrollingFrame")
-local ItemBoxTemplate = script.TextButton
+local ItemBoxTemplate = TemplateFolder.ItemsButton
 
 
 local function onItemsAdded(items)
