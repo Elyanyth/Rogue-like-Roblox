@@ -9,7 +9,7 @@ local AbilityAddedEvent = ReplicatedStorage:WaitForChild("AbilityAddedEvent")
 -- GUI
 local TemplateFolder = StarterGui.Templates
 local ScrollingFrame = script.Parent:FindFirstChild("ScrollingFrame")
-local ItemBoxTemplate = TemplateFolder.ItemsButton
+local ItemBoxTemplate = TemplateFolder.AbilitiesButton
 
 
 local function onItemsAdded(items)

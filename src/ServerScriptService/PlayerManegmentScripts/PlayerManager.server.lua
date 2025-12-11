@@ -28,6 +28,10 @@ local ServerScriptService = game:GetService("ServerScriptService")
 -- Events
 local playerDataEvent = ServerStorage:FindFirstChild("PlayerDataEvent")
 
+local AbilityAddedEvent = ReplicatedStorage:FindFirstChild("AbilityAddedEvent") or Instance.new("RemoteEvent")
+AbilityAddedEvent.Name = "AbilityAddedEvent"
+AbilityAddedEvent.Parent = ReplicatedStorage
+
 if not playerDataEvent then
 	playerDataEvent = Instance.new("RemoteEvent")
 	playerDataEvent.Name = "PlayerDataEvent"
@@ -75,6 +79,9 @@ Players.PlayerAdded:Connect(function(player)
 		obj.Value = 0
 		obj.Parent = AbilitiesFolder 
 		
+		local AbilityList = playerDataModule.GetAbilityList(player)
+		AbilityAddedEvent:FireClient(player, AbilityList)
+
 	end
 end)
 
