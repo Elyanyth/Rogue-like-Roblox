@@ -186,4 +186,33 @@ function plrDataModule.GetItem(Player: Player, TargetItem)
 
 end
 
+-- Player Ability Manager 
+
+function plrDataModule.GetAbilityList(Player: Player): table
+    local ItemTable = {}
+    local PlayerFolder = plrDataModule.getPlayerFolder(Player)
+    local AbilityFolder = PlayerFolder:FindFirstChild("Abilities")
+
+    for _, Ability in pairs(AbilityFolder:GetChildren()) do 
+        local AbilityName = Ability.Name
+        local AbilityAmount = Ability.Value
+        
+        ItemTable[AbilityName] = AbilityAmount
+        
+    end
+    
+    return ItemTable
+end
+
+function plrDataModule.GetAbility(Player: Player, TargetAbility)
+
+    local AbilityList = plrDataModule.GetAbilityList(Player)
+
+    if AbilityList[TargetAbility] then 
+        return AbilityList[TargetAbility]
+    end
+
+
+end
+
 return plrDataModule

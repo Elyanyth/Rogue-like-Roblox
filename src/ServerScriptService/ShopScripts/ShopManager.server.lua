@@ -41,6 +41,10 @@ local ItemsAddedEvent = ReplicatedStorage:FindFirstChild("ItemsAddedEvent") or I
 ItemsAddedEvent.Name = "ItemsAddedEvent"
 ItemsAddedEvent.Parent = ReplicatedStorage
 
+local AbilityAddedEvent = ReplicatedStorage:FindFirstChild("AbilityAddedEvent") or Instance.new("RemoteEvent")
+AbilityAddedEvent.Name = "AbilityAddedEvent"
+AbilityAddedEvent.Parent = ReplicatedStorage
+
 -- Modules
 local Modules = require(ServerScriptService.ModuleLoader)
 local LootModule = Modules.Get("LootModule")
@@ -77,7 +81,7 @@ local function applyStatReward(playerStats, lootItem)
 	end
 end
 
-local function applySpellReward(playerAbilities, lootItem)
+local function applySpellReward(Player, playerAbilities, lootItem)
 	local spellObject = playerAbilities:FindFirstChild(lootItem.id)
 
 	if not spellObject then
@@ -89,6 +93,9 @@ local function applySpellReward(playerAbilities, lootItem)
 	end
 
 	spellObject.Value = spellObject.Value + lootItem.amount
+
+	local AbilityList = PlayerDataModule.GetAbilityList(Player)
+	AbilityAddedEvent:FireClient(Player, AbilityList)
 end
 
 local function applyItemReward(Player, ItemFolder, lootItem)
@@ -171,7 +178,7 @@ SelectionEvent.OnServerEvent:Connect(function(player, selectionIndex)
 	if selectedLoot.type == "stat" then
 		applyStatReward(playerStats, selectedLoot)
 	elseif selectedLoot.type == "spell" then
-		applySpellReward(playerAbilities, selectedLoot)
+		applySpellReward(player, playerAbilities, selectedLoot)
 	elseif selectedLoot.type == "item" then
 		applyItemReward(player, playerItems, selectedLoot)
 	else
