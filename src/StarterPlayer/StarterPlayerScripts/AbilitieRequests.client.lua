@@ -11,7 +11,9 @@ local Player = Players.LocalPlayer
 
 -- Helper function to trigger ability
 local function useAbility(abilityName, mousePos, spawnType)
-	AbilityEvent:FireServer(abilityName, mousePos, spawnType)
+	if abilityName ~= "Empty" and abilityName then
+		AbilityEvent:FireServer(abilityName, mousePos, spawnType)
+	end
 end
 
 local EquipedButtons = Player.PlayerGui:WaitForChild("ScreenGui").ShopGui.AbilitiesInventory.Abilities.Equiped:GetChildren()
