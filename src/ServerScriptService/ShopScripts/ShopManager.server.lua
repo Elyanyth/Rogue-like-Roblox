@@ -103,10 +103,15 @@ local function applyItemReward(Player, ItemFolder, lootItem)
 
 	if not Item then 
 		-- Create new spell/ability
-		Item = Instance.new("IntValue")
-		Item.Name = lootItem.id
-		Item.Value = 0
+		-- Item = Instance.new("IntValue")
+		-- Item.Name = lootItem.id
+		-- Item.Value = 0
+		-- Item.Parent = ItemFolder
+
+		local ItemBank = ServerStorage.Items
+		Item = ItemBank:FindFirstChild(lootItem.id)
 		Item.Parent = ItemFolder
+
 	end
 
 	Item.Value = Item.Value + lootItem.amount

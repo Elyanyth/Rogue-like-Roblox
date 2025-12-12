@@ -167,8 +167,9 @@ function plrDataModule.GetItemList(Player: Player): table
     for _, item in pairs(ItemFolder:GetChildren()) do 
         local itemName = item.Name
         local itemAmount = item.Value
+        local Description = item.Description.Value
         
-        ItemTable[itemName] = itemAmount
+        ItemTable[itemName] = {itemAmount, Description}
         
     end
     

@@ -35,12 +35,15 @@ local function onItemsAdded(items)
 	end
 
 	-- SECOND: Create boxes for items that don't have a UI yet
-	for itemName, quantity in pairs(items) do
+	for itemName, itemData in pairs(items) do
 		if not updatedItems[itemName] then
 			local newBox = ItemBoxTemplate:Clone()
 			newBox.Visible = true
 			newBox.Name = itemName .. "_Slot"
-			newBox.Text = itemName .. " (x" .. quantity .. ")"
+			newBox.Text = itemName .. " (x" .. itemData[1] .. ")"
+			
+			local tooltip = newBox.Tooltip
+			tooltip.Text = (itemData[2])
 
 			-- Store the item name so we can identify this box later
 			newBox:SetAttribute("ItemName", itemName)

@@ -7,14 +7,14 @@ local Mouse = Player:GetMouse()
 local ScreenGui = Player.PlayerGui.ScreenGui.ShopGui
 
 -- Text you want to show when hovering
-local tooltipText = "This is a tooltip!"
+-- local tooltipText = "This is a tooltip!"
 
 -- When mouse enters the button
 button.MouseEnter:Connect(function()
     tooltip.ZIndex = 999
    
     tooltip.Parent = ScreenGui
-	tooltip.Text = tooltipText
+	-- tooltip.Text = tooltipText
 	tooltip.Visible = true
 
 	-- Update tooltip position to follow mouse
