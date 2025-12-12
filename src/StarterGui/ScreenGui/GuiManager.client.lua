@@ -10,6 +10,7 @@ local shop = shopGui:WaitForChild("Shop")
 local cycleLeft = shopGui:WaitForChild("CycleLeft")
 local cycleRight = shopGui:WaitForChild("CycleRight")
 local MoneyDisplay = shopGui:WaitForChild("MoneyDisplay")
+local ShopButton = gui:WaitForChild("ShopButton")
 
 local timerEvent = ReplicatedStorage:WaitForChild("TimerUpdate")
 local lootEvent = ReplicatedStorage:WaitForChild("LootEvent")
@@ -31,6 +32,7 @@ timerEvent.OnClientEvent:Connect(function(timeLeft)
 		nextButton.Visible = true
 		cycleLeft.Visible = true
 		cycleRight.Visible = true
+		ShopButton.Visible = true
 		
 		nextButton.Interactable = true
 		nextButton. Active = true
@@ -42,6 +44,8 @@ timerEvent.OnClientEvent:Connect(function(timeLeft)
 		nextButton.Visible = false
 		cycleLeft.Visible = false
 		cycleRight.Visible = false
+		ShopButton.Visible = false
+
 		
 		nextButton.Interactable = false
 		nextButton. Active = false

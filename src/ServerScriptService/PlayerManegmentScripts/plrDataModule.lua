@@ -40,7 +40,7 @@ export type PlayerStats = {
 -- Default player statistics (used when creating new player data)
 plrDataModule.DefaultStats = {
     health = 100,
-    speed = 20,
+    speed = 16,
     strength = 0,
     armor = 0,
     critRate = 0,

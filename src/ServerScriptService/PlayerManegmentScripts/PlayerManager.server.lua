@@ -61,8 +61,26 @@ local function CreateFolder(folderName, parent)
 	return folder
 end
 
+
+local function disableJump(character)
+	local humanoid = character:WaitForChild("Humanoid")
+	
+	-- Forcefully disable jumping from the server
+	humanoid.JumpPower = 0
+	humanoid.JumpHeight = 0
+	humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
+	
+	-- Stop hackers from forcing Jump internally
+	humanoid.Changed:Connect(function(property)
+		if property == "Jump" then
+			humanoid.Jump = false
+		end
+	end)
+end
+
 -- Player Added stuff
 Players.PlayerAdded:Connect(function(player)
+	player.CharacterAdded:Connect(disableJump)
 	-- Check if the folder already exists (avoid duplicates)
 	if not ServerStorage:FindFirstChild(player.Name) then
 		

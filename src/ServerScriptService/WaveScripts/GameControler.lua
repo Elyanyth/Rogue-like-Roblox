@@ -37,7 +37,7 @@ local RerollModule = Modules.Get("RerollModule")
 local ReadyCheck = Modules.Get("ReadyCheck")
 local MobSpawner = Modules.Get("MobSpawner")
 
-local timerLength = 20
+local baseTimerLength = 20
 local gameActive = false
 
 ----------------------------------------------------
@@ -94,7 +94,7 @@ function GameController.Start()
 		if CurrentWave ~= 1 then readyCheck:WaitForAllReady() end
 		MobSpawner.Start()
 
-		local timeLeft = timerLength
+		local timeLeft = math.min(70, baseTimerLength + (CurrentWave * 5))
 
 		while timeLeft > 0 do
 			if AreAllPlayersDead() then
