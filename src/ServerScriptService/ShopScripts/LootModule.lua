@@ -87,16 +87,17 @@ local function pickWeighted(rand, lootTable)
     local roll = rand:NextNumber() * total
     local accumulated = 0
     
-    for _, item in ipairs(lootTable) do
-        accumulated = accumulated + item.weight
+    for index, item in ipairs(lootTable) do
+        accumulated += item.weight
         if roll < accumulated then
-            return item
+            return item, index
         end
     end
     
-    -- Fallback (should rarely happen due to floating point)
-    return lootTable[#lootTable]
+    -- Fallback (floating point safety)
+    return lootTable[#lootTable], #lootTable
 end
+
 
 -- Generates a reward for the player and returns the loot entry
 -- Parameters:
@@ -122,25 +123,36 @@ function LootModule.GenerateReward(player, rolls)
     local rand = Random.new(seed)
     
     -- Generate each roll
+    -- Create a temporary copy of the loot pool
+    local availableLoot = table.clone(LOOT)
+
     for i = 1, rolls do
-        local picked = pickWeighted(rand, LOOT)
-        
+        if #availableLoot == 0 then
+            warn("LootModule: No more unique loot to roll")
+            break
+        end
+
+        local picked, pickedIndex = pickWeighted(rand, availableLoot)
+
         if not picked then
             warn(`LootModule: Failed to pick item for roll {i}`)
             continue
         end
-        
-        -- Create loot item result
+
         local result = {
             id = picked.id,
             type = picked.type,
             amount = rand:NextInteger(picked.min, picked.max),
             weight = picked.weight,
-            rollNumber = i -- Track which roll this was
+            rollNumber = i
         }
-        
+
         table.insert(lootTable, result)
+
+        -- ❌ Remove the picked item so it can't be rolled again
+        table.remove(availableLoot, pickedIndex)
     end
+
     
     -- Store pending loot for this player
     PlayerLootData[player] = lootTable

@@ -72,7 +72,7 @@ function BaseSpell:Activate(player, mousePos, stats)
     -- print(player.Name .. " used " .. self.Name .. "!")
 
     -- Calculate actual cooldown
-    self.Cooldown = self.BaseCooldown * math.clamp(1 - (stats.cooldownReduction/100), 0.5, 1)
+    self.Cooldown = self.BaseCooldown * math.clamp(10 - (stats.cooldownReduction/100), 0, 1)
 
     -- Damage calculation
     local damage = damageModule.CalculateDamage(self.BaseDamage, stats)

@@ -25,7 +25,7 @@ local function onItemsAdded(items)
 
 			if itemName and items[itemName] then
 				-- Update quantity
-				box.Text = itemName .. " (x" .. items[itemName] .. ")"
+				box.Text = itemName .. " (x" .. items[itemName][1] .. ")"
 				updatedItems[itemName] = true
 			else
 				-- Item no longer exists → hide it

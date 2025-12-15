@@ -4,24 +4,32 @@ local genericFunctions = {}
 local players = game:GetService("Players")
 
 function genericFunctions.getClosestPlayer(enemy)
-    
-    local rootPart = enemy:FindFirstChild("HumanoidRootPart")
+    local enemyRoot = enemy:FindFirstChild("HumanoidRootPart")
+    if not enemyRoot then
+        return nil, math.huge
+    end
 
     local closestPlayer = nil
-        local closestDist = math.huge
-    
-        for _, player in ipairs(players:GetPlayers()) do
-            local Character = player.Character
-            if Character and rootPart  then
-                local dist = (player.Character.HumanoidRootPart.Position - rootPart.Position).Magnitude
+    local closestDist = math.huge
+
+    for _, player in ipairs(players:GetPlayers()) do
+        local character = player.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            local root = character:FindFirstChild("HumanoidRootPart")
+
+            -- skip dead or invalid characters
+            if humanoid and humanoid.Health > 0 and root then
+                local dist = (root.Position - enemyRoot.Position).Magnitude
                 if dist < closestDist then
                     closestDist = dist
                     closestPlayer = player
                 end
             end
         end
-        return closestPlayer, closestDist
+    end
 
+    return closestPlayer, closestDist
 end
 
 
