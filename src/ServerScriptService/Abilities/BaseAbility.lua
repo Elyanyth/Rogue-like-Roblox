@@ -44,12 +44,22 @@ function BaseSpell:SpawnProjectile(modelName, cframe, speed)
     return part
 end
 
+-- Utility: spawns the spell in front of player
 function BaseSpell:SpawnAttack(modelName, cframe)
     local part = ServerStorage.Abilities:FindFirstChild(modelName):Clone()
     part.CFrame = cframe
     part.Parent = workspace
 
     return part
+end
+
+function BaseSpell:SpawnAttackAtMouse(modelName, mousePos)
+    -- print(mousePos)
+    local part = ServerStorage.Abilities:FindFirstChild(modelName):Clone()
+    part.Position = mousePos.Position
+    part.Parent = workspace
+
+    return part 
 end
 
 -- Default hit handling (can be overridden)

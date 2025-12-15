@@ -11,11 +11,11 @@ local PlayerData = Modules.Get("PlayerData")
 
 -- Setup config for this spell
 local Fireball = BaseSpell.new({
-    Name = "Fireball",
-    ModelName = "Fireball",
-    BaseDamage = 50,
-    BaseCooldown = 5,
-    DebrisTimer = 3
+    Name = "IceBlast",
+    ModelName = "IceBlast",
+    BaseDamage = 100,
+    BaseCooldown = 10,
+    DebrisTimer = 0.5
 })
 
 -- Override OnCast (unique Fireball behavior)
@@ -25,7 +25,9 @@ function Fireball:OnCast(player, mousePos, stats, damage)
 
     -- Extra: scaling based on Wizard Cap
     local WizardCaps = PlayerData.GetItem(player, "Wizard Cap") or 0
-    local multiplier = WizardCaps > 0 and math.max(1, 1 + (WizardCaps / 10)) or 1
+	local cap = tonumber(WizardCaps) or 0
+
+	local multiplier = cap > 0 and (1 + cap / 10) or 1
 
     -- Spawn fireball projectile
     local spawnCF = CFrame.new(
@@ -33,7 +35,7 @@ function Fireball:OnCast(player, mousePos, stats, damage)
         Vector3.new(mousePos.Position.X, root.Position.Y, mousePos.Position.Z)
     ) * CFrame.new(0,0,-5)
 
-    local part = self:SpawnProjectile(self.ModelName, spawnCF, 80)
+    local part = self:SpawnAttackAtMouse(self.ModelName, mousePos)
 
     -- Apply size multiplier
     if typeof(multiplier) == "number" and multiplier > 0 then
