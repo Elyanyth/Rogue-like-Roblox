@@ -25,7 +25,7 @@ function Fireball:OnCast(player, mousePos, stats, damage)
 
     -- Extra: scaling based on Wizard Cap
     local WizardCaps = PlayerData.GetItem(player, "Wizard Cap") or 0
-    local multiplier = WizardCaps > 0 and math.max(1, 1 + (WizardCaps / 10)) or 1
+    local multiplier = WizardCaps[1] > 0 and math.max(1, 1 + (WizardCaps[1] / 10)) or 1
 
     -- Spawn fireball projectile
     local spawnCF = CFrame.new(
