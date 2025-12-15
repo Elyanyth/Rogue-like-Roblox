@@ -39,6 +39,7 @@ local Modules = {
 
 	-- Utilities
 	GenericFunctions = ServerScriptService:WaitForChild("GenericFunctions"),
+	PlayerStats = ServerScriptService:WaitForChild("ShopScripts"):WaitForChild("PlayerStats"),
 	
 	-- Abilities 
 	BaseAbility = ServerScriptService:WaitForChild("Abilities"):WaitForChild("BaseAbility"),
