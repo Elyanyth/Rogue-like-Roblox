@@ -109,7 +109,7 @@ local function applyItemReward(Player, ItemFolder, lootItem)
 		-- Item.Parent = ItemFolder
 
 		local ItemBank = ServerStorage.Items
-		Item = ItemBank:FindFirstChild(lootItem.id)
+		Item = ItemBank:FindFirstChild(lootItem.id):Clone()
 		Item.Parent = ItemFolder
 
 	end
