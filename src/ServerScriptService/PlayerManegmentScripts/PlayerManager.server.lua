@@ -26,17 +26,13 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 
 -- Events
-local playerDataEvent = ServerStorage:FindFirstChild("PlayerDataEvent")
+local playerDataEvent = ReplicatedStorage:FindFirstChild("PlayerDataEvent") or Instance.new("RemoteEvent")
+playerDataEvent.Name = "PlayerDataEvent"
+playerDataEvent.Parent = ReplicatedStorage
 
 local AbilityAddedEvent = ReplicatedStorage:FindFirstChild("AbilityAddedEvent") or Instance.new("RemoteEvent")
 AbilityAddedEvent.Name = "AbilityAddedEvent"
 AbilityAddedEvent.Parent = ReplicatedStorage
-
-if not playerDataEvent then
-	playerDataEvent = Instance.new("RemoteEvent")
-	playerDataEvent.Name = "PlayerDataEvent"
-	playerDataEvent.Parent = ReplicatedStorage
-end
 
 -- Modules
 local Modules = require(ServerScriptService.ModuleLoader)

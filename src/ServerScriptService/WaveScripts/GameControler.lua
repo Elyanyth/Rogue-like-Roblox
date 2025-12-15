@@ -36,6 +36,7 @@ local WaveModule = Modules.Get("WaveModule")
 local RerollModule = Modules.Get("RerollModule")
 local ReadyCheck = Modules.Get("ReadyCheck")
 local MobSpawner = Modules.Get("MobSpawner")
+local PlayerData = Modules.Get("PlayerData")
 
 local baseTimerLength = 20
 local gameActive = false
@@ -74,8 +75,14 @@ end
 ----------------------------------------------------
 local function ResetGameState()
     WaveModule.Reset()          -- You must add Reset() inside WaveModule
-    -- MobSpawner.Reset()          -- You must add Reset() in MobSpawner
-    ClearMap()
+    -- MobSpawner.Reset() 
+	-- You must add Reset() in MobSpawner
+	for _, player in pairs(Players:GetChildren()) do
+		PlayerData.StatReset(player)
+	end
+    
+	
+	ClearMap()
 end
 
 

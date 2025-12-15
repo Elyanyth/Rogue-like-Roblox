@@ -22,7 +22,7 @@ local plrDataModule = {}
 
 -- Services
 local ServerStorage = game:GetService("ServerStorage")
-
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 -- Type Definitions
 export type PlayerStats = {
     health: number,
@@ -50,6 +50,12 @@ plrDataModule.DefaultStats = {
     Income = 20,
     Money = 20
 }
+
+-- EVENTS
+local playerDataEvent = ReplicatedStorage:FindFirstChild("PlayerDataEvent") or Instance.new("RemoteEvent")
+playerDataEvent.Name = "PlayerDataEvent"
+playerDataEvent.Parent = ReplicatedStorage
+
 
 --[[
     Retrieves a player's data folder from ServerStorage
@@ -155,6 +161,11 @@ function plrDataModule.StatReset(player: Player)
             end
         end
     end
+
+    local plrStats = plrDataModule.fetchPlrStatsTable(player)
+	print("Reset " .. player.Name .. " Stats")
+	playerDataEvent:FireClient(player, plrStats)	
+
 end
 
 -- Player Items Manager
