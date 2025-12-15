@@ -62,11 +62,16 @@ end)
 
 lootEvent.OnClientEvent:Connect(function(lootTable)
 	
-	--print(lootTable[1].id)
-	--print(shop:GetChildren())
+	print(lootTable)
+	-- print(shop.Loot:GetChildren())
 	for i, button in ipairs(shop.Loot:GetChildren()) do
 		if button:IsA("TextButton") then
-			button.TextBox.Text = lootTable[i-1].id .. " + " .. lootTable[i-1].amount
+			if lootTable[i-1].description then 
+				button.TextBox.Text = lootTable[i-1].id .. " + " .. lootTable[i-1].amount .. "\n" .. lootTable[i-1].description			
+			else
+				button.TextBox.Text = lootTable[i-1].id .. " + " .. lootTable[i-1].amount
+			end
+
 		end
 	end
 

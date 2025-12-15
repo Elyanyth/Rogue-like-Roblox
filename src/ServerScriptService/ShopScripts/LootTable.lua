@@ -16,11 +16,11 @@ lootTable.UTILITY_STATS = {
 }
 
 lootTable.SPELLS = {
-	{ id = "Fireball", weight = 100, type = "spell", min = 1, max = 1 },
+	{ id = "Fireball", weight = 100, type = "spell", min = 1, max = 1, description = "Shoots a fireball in a straight line when activated." },
 }
 
 lootTable.ITEMS = {
-	{id = "Wizard Cap", weight = 100, type = "item", min = 1, max = 1 },
+	{id = "Wizard Cap", weight = 100, type = "item", min = 1, max = 1, description = "Increases Firball size by 10%"},
 }
 
 -- Helper to merge all or specific tables

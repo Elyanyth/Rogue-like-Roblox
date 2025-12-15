@@ -144,6 +144,7 @@ function LootModule.GenerateReward(player, rolls)
             type = picked.type,
             amount = rand:NextInteger(picked.min, picked.max),
             weight = picked.weight,
+            description = picked.description,
             rollNumber = i
         }
 
