@@ -188,15 +188,15 @@ function plrDataModule.GetItemList(Player: Player): table
 end
 
 function plrDataModule.GetItem(Player: Player, TargetItem)
-
     local ItemList = plrDataModule.GetItemList(Player)
 
-    if ItemList[TargetItem] then 
-        return ItemList[TargetItem]
+    if ItemList[TargetItem] == nil then
+        ItemList[TargetItem] = 0
     end
 
-
+    return ItemList[TargetItem]
 end
+
 
 -- Player Ability Manager 
 

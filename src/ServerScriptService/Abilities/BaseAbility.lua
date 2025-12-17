@@ -31,18 +31,25 @@ function BaseSpell:OnCast(player, mousePos, stats, model)
 end
 
 -- Utility: spawns the projectile & sets velocity
-function BaseSpell:SpawnProjectile(modelName, cframe, speed)
+function BaseSpell:SpawnProjectile(modelName, cframe, speed, mousePos)
     local part = ServerStorage.Abilities:FindFirstChild(modelName):Clone()
-    part.CFrame = cframe
+
+    -- Create a look-at CFrame
+    local origin = cframe.Position
+    local target = Vector3.new(mousePos.X, origin.Y, mousePos.Z)
+    local lookCFrame = CFrame.lookAt(origin, target)
+
+    part.CFrame = lookCFrame
     part.Parent = workspace
 
     local bv = Instance.new("BodyVelocity")
-    bv.Velocity = part.CFrame.LookVector * speed
+    bv.Velocity = lookCFrame.LookVector * speed
     bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
     bv.Parent = part
 
     return part
 end
+
 
 -- Utility: spawns the spell in front of player
 function BaseSpell:SpawnAttack(modelName, cframe)

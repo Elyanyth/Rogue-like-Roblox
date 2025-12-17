@@ -41,7 +41,7 @@ function Fireball:OnCast(player, mousePos, stats, damage)
         Vector3.new(mousePos.Position.X, root.Position.Y, mousePos.Position.Z)
     ) * CFrame.new(0,0,-5)
 
-    local part = self:SpawnProjectile(self.ModelName, spawnCF, 80)
+    local part = self:SpawnProjectile(self.ModelName, spawnCF, 80, mousePos)
 
     -- Apply size multiplier
     part.Size *= sizeMultiplier

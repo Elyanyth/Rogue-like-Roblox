@@ -18,6 +18,7 @@ lootTable.UTILITY_STATS = {
 lootTable.SPELLS = {
 	{ id = "Fireball", weight = 100, type = "spell", min = 1, max = 1, description = "Shoots a fireball in a straight line when activated." },
 	{ id = "IceBlast", weight = 100, type = "spell", min = 1, max = 1, description = "Creates a field of ice damaging enemys inside." },
+	{ id = "IceLance", weight = 100, type = "spell", min = 1, max = 1, description = "Fires an IceLance that damages and slows enemys." },
 
 }
 
