@@ -75,7 +75,9 @@ function Whirlpool:OnCast(player, mousePos, stats, damage)
 
     -- Apply item-based modifiers
     local radius, duration, slowAmount = applyItemModifiers(player, self)
-    radius = whirlpoolPart.size.Y / 2
+
+    radius = whirlpoolPart.size.Y / 2 -- OVERIDES RADUIS ATM!!!!! ----------------------------------------------------------------------------------------------------
+
     -- Clamp slow between 0 and 95%
     slowAmount = math.clamp(slowAmount or 0.5, 0, 0.95)
 
