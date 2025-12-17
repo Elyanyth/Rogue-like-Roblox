@@ -8,6 +8,7 @@ local Modules = require(ServerScriptService:WaitForChild("ModuleLoader"))
 local BaseSpell = Modules.Get("BaseAbility")
 local damageModule = Modules.Get("DamageModule")
 local PlayerData = Modules.Get("PlayerData")
+local ItemManager = Modules.Get("ItemManager")
 
 -- Setup config for this spell
 local Fireball = BaseSpell.new({
@@ -24,8 +25,15 @@ function Fireball:OnCast(player, mousePos, stats, damage)
     local root = character.HumanoidRootPart
 
     -- Extra: scaling based on Wizard Cap
-    local WizardCaps = PlayerData.GetItem(player, "Wizard Cap") or 0
-    local multiplier = WizardCaps > 0 and math.max(1, 1 + (WizardCaps / 10)) or 1
+    local modifiers = ItemManager:GetSpellModifiers(player, self.Name)
+
+    local sizeMultiplier = 1
+
+    for _, mod in ipairs(modifiers) do
+        if mod.data.SizeMultiplier then
+            sizeMultiplier *= mod.data.SizeMultiplier(mod.stacks)
+        end
+    end
 
     -- Spawn fireball projectile
     local spawnCF = CFrame.new(
@@ -36,9 +44,7 @@ function Fireball:OnCast(player, mousePos, stats, damage)
     local part = self:SpawnProjectile(self.ModelName, spawnCF, 80)
 
     -- Apply size multiplier
-    if typeof(multiplier) == "number" and multiplier > 0 then
-        part.Size = part.Size * multiplier
-    end
+    part.Size *= sizeMultiplier
 
     -- Prevent multi-hit
     local hitEntities = {}

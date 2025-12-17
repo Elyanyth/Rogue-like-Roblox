@@ -48,7 +48,7 @@ plrDataModule.DefaultStats = {
     healthRegen = 0,
     cooldownReduction = 0,
     Income = 20,
-    Money = 20
+    Money = 999999
 }
 
 -- EVENTS

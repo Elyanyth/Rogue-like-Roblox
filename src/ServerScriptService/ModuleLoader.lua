@@ -44,6 +44,10 @@ local Modules = {
 	-- Abilities 
 	BaseAbility = ServerScriptService:WaitForChild("Abilities"):WaitForChild("BaseAbility"),
 
+
+	-- Items
+	ItemManager = ServerScriptService:WaitForChild("ItemManager"),
+
 	-- Shared (ReplicatedStorage)
 	-- SharedUtils = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("SharedUtils"),
 }
