@@ -12,8 +12,8 @@ local ItemManager = Modules.Get("ItemManager")
 
 -- Setup config for this spell
 local Spell = BaseSpell.new({
-    Name = "IceLance",
-    ModelName = "IceLance",
+    Name = "IceSpear",
+    ModelName = "IceSpear",
     BaseDamage = 35,
     BaseCooldown = 3,
     DebrisTimer = 3
