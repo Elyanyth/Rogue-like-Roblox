@@ -6,6 +6,10 @@ local StarterGui = game:GetService("StarterGui")
 -- Events 
 local AbilityAddedEvent = ReplicatedStorage:WaitForChild("AbilityAddedEvent")
 
+local gameOverEvent = ReplicatedStorage:FindFirstChild("GameOverEvent") or Instance.new("RemoteEvent")
+gameOverEvent.Name = "GameOverEvent"
+gameOverEvent.Parent = ReplicatedStorage
+
 -- GUI
 local TemplateFolder = StarterGui.Templates
 local ScrollingFrame = script.Parent:FindFirstChild("ScrollingFrame")
@@ -51,4 +55,18 @@ local function onItemsAdded(items)
 end
 
 
+local function OnRemove()
+	for _, box in ipairs(ScrollingFrame:GetChildren()) do
+		if box:IsA("TextButton") and box ~= ItemBoxTemplate then
+			local itemName = box:GetAttribute("ItemName")
+
+			if itemName ~= "PrimaryAttack" then
+				box:Destroy()
+			end
+		end
+	end
+end
+
+
 AbilityAddedEvent.OnClientEvent:Connect(onItemsAdded)
+gameOverEvent.OnClientEvent:Connect(OnRemove)

@@ -79,6 +79,8 @@ local function ResetGameState()
 	-- You must add Reset() in MobSpawner
 	for _, player in pairs(Players:GetChildren()) do
 		PlayerData.StatReset(player)
+		PlayerData.ItemReset(player)
+		PlayerData.AbilityReset(player)
 	end
     
 	

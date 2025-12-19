@@ -197,6 +197,16 @@ function plrDataModule.GetItem(Player: Player, TargetItem)
     return ItemList[TargetItem]
 end
 
+function plrDataModule.ItemReset(Player: Player)
+    local PlayerFolder = plrDataModule.getPlayerFolder(Player)
+    local ItemFolder = PlayerFolder:FindFirstChild("Items")
+
+    for _, Item in ipairs(ItemFolder:GetChildren()) do
+        if Item.Name ~= "PrimaryAttack" then
+            Item:Destroy()
+        end
+    end
+end
 
 -- Player Ability Manager 
 
@@ -223,8 +233,22 @@ function plrDataModule.GetAbility(Player: Player, TargetAbility)
     if AbilityList[TargetAbility] then 
         return AbilityList[TargetAbility]
     end
-
-
 end
+
+function plrDataModule.AbilityReset(Player: Player)
+    local PlayerFolder = plrDataModule.getPlayerFolder(Player)
+    local AbilityFolder = PlayerFolder:FindFirstChild("Abilities")
+
+    if not AbilityFolder then return end
+
+    print(AbilityFolder:GetChildren())
+
+    for _, Ability in ipairs(AbilityFolder:GetChildren()) do
+        if Ability.Name ~= "PrimaryAttack" then
+            Ability:Destroy()
+        end
+    end
+end
+
 
 return plrDataModule
