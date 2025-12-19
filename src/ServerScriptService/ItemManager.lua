@@ -14,8 +14,8 @@ function ItemManager:GetSpellModifiers(player, spellName)
     for _, module in ipairs(ItemsFolder:GetChildren()) do
         local item = require(module)
         local stacks = PlayerData.GetItem(player, item.Name)
-        
-        if stacks and stacks > 0 and item.Modifiers[spellName] then 
+
+        if stacks > 0 and item.Modifiers and item.Modifiers[spellName] then
             table.insert(modifiers, {
                 data = item.Modifiers[spellName],
                 stacks = stacks
@@ -25,5 +25,6 @@ function ItemManager:GetSpellModifiers(player, spellName)
 
     return modifiers
 end
+
 
 return ItemManager
