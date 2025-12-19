@@ -15,7 +15,7 @@ function ItemManager:GetSpellModifiers(player, spellName)
         local item = require(module)
         local stacks = PlayerData.GetItem(player, item.Name)
 
-        if stacks > 0 and item.Modifiers and item.Modifiers[spellName] then
+        if stacks[1] > 0 and item.Modifiers and item.Modifiers[spellName] then
             table.insert(modifiers, {
                 data = item.Modifiers[spellName],
                 stacks = stacks

@@ -191,7 +191,7 @@ function plrDataModule.GetItem(Player: Player, TargetItem)
     local ItemList = plrDataModule.GetItemList(Player)
 
     if ItemList[TargetItem] == nil then
-        ItemList[TargetItem] = 0
+        ItemList[TargetItem] = {0, nil}
     end
 
     return ItemList[TargetItem]
