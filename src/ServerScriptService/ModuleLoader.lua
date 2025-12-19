@@ -48,6 +48,11 @@ local Modules = {
 	-- Items
 	ItemManager = ServerScriptService:WaitForChild("ItemManager"),
 
+	-- Effects
+	EffectManager = ServerScriptService:WaitForChild("Effects"):WaitForChild("EffectManager"),
+	Slowness = ServerScriptService:WaitForChild("Effects"):WaitForChild("Slowness"),
+
+
 	-- Shared (ReplicatedStorage)
 	-- SharedUtils = ReplicatedStorage:WaitForChild("Modules"):WaitForChild("SharedUtils"),
 }

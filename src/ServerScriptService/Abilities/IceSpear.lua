@@ -6,6 +6,8 @@ local Debris = game:GetService("Debris")
 
 local Modules = require(ServerScriptService:WaitForChild("ModuleLoader"))
 local BaseSpell = Modules.Get("BaseAbility")
+local EffectManager = Modules.Get("EffectManager")
+local Slowness = Modules.Get("Slowness")
 local damageModule = Modules.Get("DamageModule")
 local PlayerData = Modules.Get("PlayerData")
 local ItemManager = Modules.Get("ItemManager")
@@ -39,23 +41,15 @@ function Spell:OnHit(hit, damage)
         hum.Health -= damage
     end
 
-    -- Apply slow
-    local originalSpeed = hum.WalkSpeed
-    local slowAmount, slowDuration = self.SlowAmount, self.SlowDuration
+    -- Apply Slowness
 
-    -- Clamp slow to avoid negative or zero speed
-    slowAmount = math.clamp(slowAmount or 0.5, 0, 0.95)
-    slowDuration = slowDuration or 2
+    local slow = Slowness.new({
+        Target = hum,
+        Magnitude = 0.3,
+        Duration = 4
+    })
 
-    local newSpeed = originalSpeed * (1 - slowAmount)
-    hum.WalkSpeed = newSpeed
-
-    -- Restore speed after duration, if the humanoid is still alive
-    task.delay(slowDuration, function()
-        if hum and hum.Parent and hum.Health > 0 then
-            hum.WalkSpeed = originalSpeed
-        end
-    end)
+    EffectManager.ApplyEffect(slow)
 end
 
 
