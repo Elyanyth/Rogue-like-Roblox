@@ -26,7 +26,8 @@ function BaseSpell.new(config)
 end
 
 -- Override ↓ for spell-specific behaviour
-function BaseSpell:OnCast(player, mousePos, stats, model)
+-- stacks = number of times the ability has been purchased (1 = base)
+function BaseSpell:OnCast(player, mousePos, stats, damage, stacks)
     -- Default: nothing
 end
 
@@ -86,21 +87,24 @@ function BaseSpell:OnHit(hit, damage)
 end
 
 -- Main activation entry
-function BaseSpell:Activate(player, mousePos, stats)
-    -- print(player.Name .. " used " .. self.Name .. "!")
+-- stacks = number of times the ability was purchased (passed from AbilityHandler)
+function BaseSpell:Activate(player, mousePos, stats, stacks)
+    stacks = stacks or 1
 
     -- Calculate actual cooldown
     self.Cooldown = self.BaseCooldown * math.clamp(10 - (stats.cooldownReduction/100), 0, 1)
 
-    -- Damage calculation
+    -- Base damage, then scale by purchase count (+25% per additional stack)
     local damage = damageModule.CalculateDamage(self.BaseDamage, stats)
+    local stackMultiplier = 1 + (stacks - 1) * 0.25
+    damage = math.floor(damage * stackMultiplier)
 
     local character = player.Character
     local root = character and character:FindFirstChild("HumanoidRootPart")
     if not root then return end
 
-    -- Let the spell-specific subclass run its custom logic
-    return self:OnCast(player, mousePos, stats, damage)
+    -- Forward stacks to OnCast so individual abilities can scale their own effects
+    return self:OnCast(player, mousePos, stats, damage, stacks)
 end
 
 return BaseSpell

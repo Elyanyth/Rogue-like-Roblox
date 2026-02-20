@@ -46,6 +46,14 @@ local AbilityFolder = ServerScriptService:WaitForChild("Abilities")
 -- Table to track cooldowns per player
 local cooldowns = {}
 
+-- Returns how many times the player has purchased an ability (minimum 1)
+local function getAbilityStacks(player, abilityName)
+	local plrFolder = ServerStorage.PlayerData:FindFirstChild(player.Name .. " - " .. player.UserId)
+	if not plrFolder then return 1 end
+	local abilityObj = plrFolder:FindFirstChild("Abilities") and plrFolder.Abilities:FindFirstChild(abilityName)
+	return (abilityObj and abilityObj.Value > 0) and abilityObj.Value or 1
+end
+
 local function canUseAbility(player, abilityName)
 	
 	local plrFolder = ServerStorage.PlayerData:FindFirstChild(player.Name .. " - " .. player.UserId)
@@ -88,8 +96,9 @@ AbilityEvent.OnServerEvent:Connect(function(player, abilityName, mousePos, spawn
 	-- Run the ability logic safely
 	task.spawn(function()
 		local stats = playerStatsModule.fetchPlrStatsTable(player)
+		local stacks = getAbilityStacks(player, abilityName)
 		local success, err = pcall(function()
-			ability:Activate(player, mousePos, stats)
+			ability:Activate(player, mousePos, stats, stacks)
 		end)
 		if not success then
 			warn("Error activating ability " .. abilityName .. ": " .. err)
