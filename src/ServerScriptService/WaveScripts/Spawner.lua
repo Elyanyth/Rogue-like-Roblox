@@ -9,6 +9,9 @@ local Modules = require(ServerScriptService.ModuleLoader)
 local Enemy = Modules.Get("BaseEnemy")
 local RangedEnemy = Modules.Get("RangedEnemy")
 local SummonerEnemy = Modules.Get("SummonerEnemy")
+local SuicideBomber = Modules.Get("SuicideBomber")
+local EggEnemy = Modules.Get("EggEnemy")
+local MageEnemy = Modules.Get("MageEnemy")
 local EnemyDefinitions = Modules.Get("EnemyTypes")
 local DificultyManager = Modules.Get("DificultyManager")
 
@@ -67,6 +70,17 @@ local function spawnEnemy(enemyData)
 		enemy.AttackRange = enemyData.AttackRange or 25
 		enemy.AttackCooldown = enemyData.AttackCooldown or 2
 		enemy.ProjectileSpeed = enemyData.ProjectileSpeed or 20
+	elseif enemyData.Type == "Bomber" then
+		enemy = SuicideBomber.new(enemyData.Name, enemyData.Speed, enemyData.Health, enemyData.Damage, enemyData.Armor)
+	elseif enemyData.Type == "Mage" then
+		enemy = MageEnemy.new(enemyData.Name, enemyData.Speed, enemyData.Health, enemyData.Damage, enemyData.Armor)
+	elseif enemyData.Type == "Egg" then
+		enemy = EggEnemy.new(enemyData.Name, enemyData.Speed, enemyData.Health, enemyData.Damage, enemyData.Armor)
+		enemy.HatchStats = enemyData.HatchStats
+		local eggModel = EggEnemy.CreateEggModel(enemyData.Health)
+		eggModel.Parent = workspace
+		enemy:SetModel(eggModel)
+		eggModel:SetPrimaryPartCFrame(CFrame.new(getRandomSpawnPosition()))
 	end
 
 	if enemyData.Model then

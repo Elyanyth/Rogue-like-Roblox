@@ -169,6 +169,7 @@ end
 function Enemy:Attack(target: Model)
 	local targetHumanoid = target:FindFirstChildOfClass("Humanoid")
 	if targetHumanoid then
+		if targetHumanoid:GetAttribute("IsInvincible") then return end
 		targetHumanoid:TakeDamage(self.Damage)
 		print(self.Name .. " attacked for " .. self.Damage .. " damage!")
 	end
@@ -208,7 +209,7 @@ end
 
 function Enemy:Die()
 	self:StopChasing()
-
+	self.Humanoid.Health = 0
 	if self.Model then
 		local Debris = game:GetService("Debris")
 		Debris:AddItem(self.Model, 5) -- Model will be cleaned up after 5 seconds

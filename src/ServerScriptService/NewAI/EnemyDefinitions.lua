@@ -59,6 +59,45 @@ EnemyDefinitions.Types = {
             Damage = 12,
             Armor = 2,
         }
+    },
+    {
+        Weight = 15,
+        Type = "Bomber",
+        Name = "Suicide Bomber",
+        Speed = 18,
+        Health = 60,
+        Damage = 0,
+        Armor = 0,
+        Model = ServerStorage.EnemyModels.Bomber,
+        AttackCooldown = 999,
+    },
+    {
+        Weight = 2,
+        Type = "Egg",
+        Name = "Egg",
+        Speed = 0,
+        Health = 100,
+        Damage = 0,
+        Armor = 0,
+        -- No Model field: the egg Part is created programmatically in EggEnemy
+        HatchStats = {
+            Name = "Empowered Zombie",
+            Speed = 16,
+            Health = 300,
+            Damage = 40,
+            Armor = 10,
+            ModelScale = 2,
+        }
+    },
+    {
+        Weight = 8,
+        Type = "Mage",
+        Name = "Mage",
+        Speed = 8,
+        Health = 120,
+        Damage = 0,
+        Armor = 10,
+        Model = ServerStorage.EnemyModels.Mage,
     }
 }
 

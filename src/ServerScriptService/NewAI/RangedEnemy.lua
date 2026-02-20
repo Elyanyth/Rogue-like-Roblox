@@ -202,8 +202,10 @@ function RangedEnemy:FireProjectile(targetPosition: Vector3, target: Model)
 		if hit:IsDescendantOf(target) then
 			local humanoid = target:FindFirstChildOfClass("Humanoid")
 			if humanoid and humanoid.Health > 0 then
-				humanoid:TakeDamage(self.Damage)
-				print(self.Name .. "'s projectile hit for " .. self.Damage .. " damage!")
+				if not humanoid:GetAttribute("IsInvincible") then
+					humanoid:TakeDamage(self.Damage)
+					print(self.Name .. "'s projectile hit for " .. self.Damage .. " damage!")
+				end
 			end
 			
 			-- Destroy projectile on hit

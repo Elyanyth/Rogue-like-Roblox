@@ -46,6 +46,9 @@ local Modules = {
 	BaseEnemy = ServerScriptService:WaitForChild("NewAI"):WaitForChild("BaseEnemy"),
 	RangedEnemy = ServerScriptService:WaitForChild("NewAI"):WaitForChild("RangedEnemy"),
 	SummonerEnemy = ServerScriptService:WaitForChild("NewAI"):WaitForChild("SummonerEnemy"),
+	SuicideBomber = ServerScriptService:WaitForChild("NewAI"):WaitForChild("SuicideBomber"),
+	EggEnemy = ServerScriptService:WaitForChild("NewAI"):WaitForChild("EggEnemy"),
+	MageEnemy = ServerScriptService:WaitForChild("NewAI"):WaitForChild("MageEnemy"),
 
 	-- Utilities
 	GenericFunctions = ServerScriptService:WaitForChild("GenericFunctions"),
