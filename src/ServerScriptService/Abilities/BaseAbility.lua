@@ -10,7 +10,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local Modules = require(ServerScriptService:WaitForChild("ModuleLoader"))
 local damageModule = require(ServerScriptService.DamageModule)
 local PlayerData = Modules.Get("PlayerData")
-
+local BaseEnemy = Modules.Get("BaseEnemy")
 -- Constructor
 function BaseSpell.new(config)
     -- config: {Name, ModelName, BaseDamage, BaseCooldown}
@@ -80,7 +80,8 @@ function BaseSpell:OnHit(hit, damage)
     if player then
         print("Hit player:", player.Name)
     else
-        hum.Health -= damage
+        local target = BaseEnemy.GetFromHumanoid(hum)
+        target:TakeDamage(damage)
     end
 end
 

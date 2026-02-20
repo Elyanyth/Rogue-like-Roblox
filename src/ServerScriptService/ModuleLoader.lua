@@ -27,15 +27,25 @@ local Modules = {
 	-- Wave Systems
 	WaveModule = ServerScriptService:WaitForChild("WaveScripts"):WaitForChild("WaveModule"),
 	ReadyCheck = ServerScriptService:WaitForChild("GameScripts"):WaitForChild("ReadyCheck"),
-	MobSpawner = ServerScriptService:WaitForChild("WaveScripts"):WaitForChild("MobSpawner"),
+	-- MobSpawner = ServerScriptService:WaitForChild("WaveScripts"):WaitForChild("MobSpawner"),
 	GameControler = ServerScriptService:WaitForChild("WaveScripts"):WaitForChild("GameControler"),
+	Spawner = ServerScriptService:WaitForChild("WaveScripts"):WaitForChild("Spawner"),
+
+
 
 
 	-- Combat Systems
-	BaseEnemy = ServerScriptService:WaitForChild("EnemyScripts"):WaitForChild("BaseAi"),
-	EnemyTypes = ServerScriptService:WaitForChild("EnemyScripts"):WaitForChild("enemyTypes"),
-	DifficultyModule = ServerScriptService:WaitForChild("EnemyScripts"):WaitForChild("DifficultyModule"),
+	-- BaseEnemy = ServerScriptService:WaitForChild("EnemyScripts"):WaitForChild("BaseAi"),
+	-- EnemyTypes = ServerScriptService:WaitForChild("EnemyScripts"):WaitForChild("enemyTypes"), -- Old EnemyTypes
+	-- DifficultyModule = ServerScriptService:WaitForChild("EnemyScripts"):WaitForChild("DifficultyModule"), -- Old Difficulty
+	DificultyManager = ServerScriptService:WaitForChild("DificultyManager"),
 	DamageModule = ServerScriptService:WaitForChild("DamageModule"),
+
+	-- Enemies
+	EnemyTypes = ServerScriptService:WaitForChild("NewAI"):WaitForChild("EnemyDefinitions"),
+	BaseEnemy = ServerScriptService:WaitForChild("NewAI"):WaitForChild("BaseEnemy"),
+	RangedEnemy = ServerScriptService:WaitForChild("NewAI"):WaitForChild("RangedEnemy"),
+	SummonerEnemy = ServerScriptService:WaitForChild("NewAI"):WaitForChild("SummonerEnemy"),
 
 	-- Utilities
 	GenericFunctions = ServerScriptService:WaitForChild("GenericFunctions"),

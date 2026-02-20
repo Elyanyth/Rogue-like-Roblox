@@ -35,10 +35,12 @@ local MoneyModule = Modules.Get("MoneyModule")
 local WaveModule = Modules.Get("WaveModule")
 local RerollModule = Modules.Get("RerollModule")
 local ReadyCheck = Modules.Get("ReadyCheck")
-local MobSpawner = Modules.Get("MobSpawner")
+-- local MobSpawner = Modules.Get("MobSpawner") Old spawner
 local PlayerData = Modules.Get("PlayerData")
+local Spawner = Modules.Get("Spawner")
 
-local baseTimerLength = 20
+
+local baseTimerLength = 0
 local gameActive = false
 
 ----------------------------------------------------
@@ -101,7 +103,7 @@ function GameController.Start()
 
 		nextWaveEvent:FireAllClients(WaveModule.Get())
 		if CurrentWave ~= 1 then readyCheck:WaitForAllReady() end
-		MobSpawner.Start()
+		Spawner.Start()
 
 		local timeLeft = math.min(70, baseTimerLength + (CurrentWave * 5))
 
@@ -118,14 +120,14 @@ function GameController.Start()
 		end
 
 		if not gameActive then
-			MobSpawner.Stop()
+			Spawner.Stop()
 			ClearMap()
 			gameOverEvent:FireAllClients(WaveModule.Get())
 			break
 		end
 
 		-- Wave end
-		MobSpawner.Stop()
+		Spawner.Stop()
 		ClearMap()
 
 		rerollEvent:FireAllClients(RerollModule.BasePrice())
@@ -152,7 +154,7 @@ end
 
 function GameController.Stop()
 	gameActive = false
-	MobSpawner.Stop()
+	Spawner.Stop()
 end
 
 return GameController
