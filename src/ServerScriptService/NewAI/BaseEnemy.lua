@@ -1,6 +1,8 @@
 --!strict
 
 local Players = game:GetService("Players")
+local ServerScriptService = game:GetService("ServerScriptService")
+local DamageIndicator = require(ServerScriptService:WaitForChild("DamageIndicatorModule"))
 
 local Enemy = {}
 Enemy.__index = Enemy
@@ -181,6 +183,10 @@ function Enemy:TakeDamage(damage: number)
 	local actualDamage = damage * (1 - damageReduction)
 
 	self.Health = math.max(0, self.Health - actualDamage)
+
+	if self.Model and self.Model.PrimaryPart then
+		DamageIndicator.Show(self.Model.PrimaryPart.Position, actualDamage)
+	end
 
 	if self.Humanoid then
 		self.Humanoid.Health = self.Health
