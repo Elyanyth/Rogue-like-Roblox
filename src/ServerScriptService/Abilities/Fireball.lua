@@ -12,7 +12,7 @@ local ItemManager = Modules.Get("ItemManager")
 -- CONFIGURATION
 -- ===============================
 local PROJECTILE_SIZE   = 2    -- diameter of the traveling ball (studs)
-local EXPLOSION_SIZE    = 18   -- diameter of the explosion sphere at peak (studs)
+local EXPLOSION_SIZE    = 10   -- diameter of the explosion sphere at peak (studs)
 local EXPAND_TIME       = 0.3  -- seconds to balloon from small → explosion
 local FADE_TIME         = 0.25 -- seconds to fade out after fully expanded
 

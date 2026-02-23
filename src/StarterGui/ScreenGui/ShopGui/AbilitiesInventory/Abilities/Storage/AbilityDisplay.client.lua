@@ -15,6 +15,34 @@ local TemplateFolder = StarterGui.Templates
 local ScrollingFrame = script.Parent:FindFirstChild("ScrollingFrame")
 local ItemBoxTemplate = TemplateFolder.AbilitiesButton
 
+-- Equipped slots (Slot1–Slot5 TextButtons inside the sibling Equiped folder)
+local EquipedFolder = script.Parent.Parent:WaitForChild("Equiped")
+
+local function getSlotsSorted()
+	local slots = {}
+	for _, slot in ipairs(EquipedFolder:GetChildren()) do
+		if slot:IsA("TextButton") then
+			table.insert(slots, slot)
+		end
+	end
+	table.sort(slots, function(a, b) return a.Name < b.Name end)
+	return slots
+end
+
+local function autoEquip(abilityName)
+	local slots = getSlotsSorted()
+	-- Don't equip if already in a slot (guards against duplicate event fires)
+	for _, slot in ipairs(slots) do
+		if slot.Text == abilityName then return end
+	end
+	for _, slot in ipairs(slots) do
+		if slot.Text == "Empty" then
+			slot.Text = abilityName
+			break
+		end
+	end
+end
+
 
 local function onItemsAdded(items)
 	print("Ability received:", items)
@@ -38,8 +66,8 @@ local function onItemsAdded(items)
 		end
 	end
 
-	-- SECOND: Create boxes for items that don't have a UI yet
-	for itemName, quantity in pairs(items) do
+	-- SECOND: Create boxes for items that don't have a UI yet, then auto-equip
+	for itemName, _ in pairs(items) do
 		if not updatedItems[itemName] then
 			local newBox = ItemBoxTemplate:Clone()
 			newBox.Visible = true
@@ -50,6 +78,9 @@ local function onItemsAdded(items)
 			newBox:SetAttribute("ItemName", itemName)
 
 			newBox.Parent = ScrollingFrame
+
+			-- Auto-assign to the first empty equipped slot
+			autoEquip(itemName)
 		end
 	end
 end
