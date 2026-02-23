@@ -38,6 +38,9 @@ AbilityAddedEvent.Parent = ReplicatedStorage
 local Modules = require(ServerScriptService.ModuleLoader)
 local playerDataModule = Modules.Get("PlayerData")
 local PlayerStatsModule = Modules.Get("PlayerStats")
+local DamageIndicator = require(ServerScriptService:WaitForChild("DamageIndicatorModule"))
+
+local PLAYER_DAMAGE_COLOR = Color3.fromRGB(220, 50, 50) -- red tint for incoming damage
 
 local function CreateStats(player, folder)
 	for statName, statValue in pairs(playerDataModule.DefaultStats) do
@@ -120,6 +123,18 @@ local function newCharacter(character)
 	local player = Players:GetPlayerFromCharacter(character)
 	local PlayerStats = playerDataModule.fetchPlrStatsTable(player)
 	PlayerStatsModule.updatePlayerCharacter(player, PlayerStats)
+
+	-- Show a red damage indicator above the player whenever their health drops
+	local humanoid = character:WaitForChild("Humanoid")
+	local rootPart = character:WaitForChild("HumanoidRootPart")
+	local prevHealth = humanoid.Health
+
+	humanoid.HealthChanged:Connect(function(newHealth)
+		if newHealth < prevHealth then
+			DamageIndicator.Show(rootPart.Position, prevHealth - newHealth, PLAYER_DAMAGE_COLOR)
+		end
+		prevHealth = newHealth
+	end)
 end
 
 local function newPlayer(player)

@@ -10,10 +10,10 @@ local MageEnemy = setmetatable({}, { __index = Enemy })
 MageEnemy.__index = MageEnemy
 
 function MageEnemy.new(name: string, speed: number, health: number, damage: number, armor: number)
-	local self = Enemy.new(name, speed, health, damage, armor)
+	local self = Enemy.new(name, speed, health, 0, armor)
 	setmetatable(self, MageEnemy)
 
-	self.LightningDamage = 30
+	self.LightningDamage = damage
 	self.LightningRadius = 8
 	self.LightningCooldown = 4
 	self.LightningWarningTime = 1.5
@@ -67,7 +67,7 @@ function MageEnemy:Chase()
 	self:Wander()
 
 	self.ChaseConnection = RunService.Heartbeat:Connect(function()
-		if not self.IsChasing or not self:IsAlive() then
+		if not self.IsChasing or not self:IsAlive() or not self.Model or not self.Model.Parent then
 			self:StopChasing()
 			return
 		end
@@ -87,32 +87,36 @@ function MageEnemy:Chase()
 end
 
 function MageEnemy:SummonLightning()
+	if not self.Model or not self.Model.Parent then return end
 	local strikePos = self:GetRandomMapPosition()
 	local radius = self.LightningRadius
 	local warningTime = self.LightningWarningTime
 
-	-- Warning circle on the ground (same flat-disc pattern as SummonerEnemy)
+	-- Warning circle on the ground: red so the danger zone is clearly readable
 	local warning = Instance.new("Part")
 	warning.Shape = Enum.PartType.Cylinder
-	warning.Size = Vector3.new(radius * 2, 0.5, radius * 2)
+	warning.Size = Vector3.new(0.1, radius * 2 , radius * 2)
 	warning.Orientation = Vector3.new(0, 0, 90)
 	warning.Position = strikePos
 	warning.Anchored = true
 	warning.CanCollide = false
 	warning.Material = Enum.Material.Neon
-	warning.BrickColor = BrickColor.new("Bright yellow")
-	warning.Transparency = 0.3
+	warning.Color = Color3.fromRGB(255, 30, 30)
+	warning.Transparency = 0.15
 	warning.Parent = workspace
 
-	-- Pulse the warning circle while counting down
+	-- Pulse from opaque → transparent so it flickers urgently
 	TweenService:Create(
 		warning,
-		TweenInfo.new(warningTime, Enum.EasingStyle.Linear),
-		{ Transparency = 0.8 }
+		TweenInfo.new(warningTime / 2, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+		{ Transparency = 0.7 }
 	):Play()
 
 	task.delay(warningTime, function()
 		warning:Destroy()
+
+		-- Abort if the mage was cleaned up during the warning window
+		if not self.Model or not self.Model.Parent then return end
 
 		-- Lightning bolt: tall thin block dropping from the sky
 		local boltHeight = 60
@@ -129,13 +133,13 @@ function MageEnemy:SummonLightning()
 		-- Impact flash disc at ground level
 		local flash = Instance.new("Part")
 		flash.Shape = Enum.PartType.Cylinder
-		flash.Size = Vector3.new(radius * 2, 0.5, radius * 2)
+		flash.Size = Vector3.new(0.1, radius, radius)
 		flash.Orientation = Vector3.new(0, 0, 90)
 		flash.Position = strikePos
 		flash.Anchored = true
 		flash.CanCollide = false
 		flash.Material = Enum.Material.Neon
-		flash.BrickColor = BrickColor.new("Bright yellow")
+		flash.Color = Color3.fromRGB(255, 30, 30)
 		flash.Transparency = 0
 		flash.Parent = workspace
 

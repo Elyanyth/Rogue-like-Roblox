@@ -1,16 +1,21 @@
 -- ServerStorage/Abilities/Fireball.lua
 local ServerScriptService = game:GetService("ServerScriptService")
-local ServerStorage = game:GetService("ServerStorage")
 local Players = game:GetService("Players")
 local Debris = game:GetService("Debris")
+local TweenService = game:GetService("TweenService")
 
 local Modules = require(ServerScriptService:WaitForChild("ModuleLoader"))
 local BaseSpell = Modules.Get("BaseAbility")
-local damageModule = Modules.Get("DamageModule")
-local PlayerData = Modules.Get("PlayerData")
 local ItemManager = Modules.Get("ItemManager")
 
--- Setup config for this spell
+-- ===============================
+-- CONFIGURATION
+-- ===============================
+local PROJECTILE_SIZE   = 2    -- diameter of the traveling ball (studs)
+local EXPLOSION_SIZE    = 18   -- diameter of the explosion sphere at peak (studs)
+local EXPAND_TIME       = 0.3  -- seconds to balloon from small → explosion
+local FADE_TIME         = 0.25 -- seconds to fade out after fully expanded
+
 local Fireball = BaseSpell.new({
     Name = "Fireball",
     ModelName = "Fireball",
@@ -19,48 +24,85 @@ local Fireball = BaseSpell.new({
     DebrisTimer = 3
 })
 
--- Override OnCast (unique Fireball behavior)
-function Fireball:OnCast(player, mousePos, stats, damage)
+function Fireball:OnCast(player, mousePos, _, damage, _)
     local character = player.Character
     local root = character.HumanoidRootPart
 
-    -- Extra: scaling based on Wizard Cap
+    -- WizardCap (or other item) size modifier
     local modifiers = ItemManager:GetSpellModifiers(player, self.Name)
-
     local sizeMultiplier = 1
-
     for _, mod in ipairs(modifiers) do
         if mod.data.SizeMultiplier then
             sizeMultiplier *= mod.data.SizeMultiplier(mod.stacks)
         end
     end
 
-    -- Spawn fireball projectile
+    local projSize     = PROJECTILE_SIZE  * sizeMultiplier
+    local explodeSize  = EXPLOSION_SIZE   * sizeMultiplier
+    local explodeRadius = explodeSize / 2
+
+    -- Spawn small projectile
     local spawnCF = CFrame.new(
         root.Position,
         Vector3.new(mousePos.Position.X, root.Position.Y, mousePos.Position.Z)
-    ) * CFrame.new(0,0,-5)
+    ) * CFrame.new(0, 0, -5)
 
     local part = self:SpawnProjectile(self.ModelName, spawnCF, 80, mousePos)
+    part.Size = Vector3.new(projSize, projSize, projSize)
 
-    -- Apply size multiplier
-    part.Size *= sizeMultiplier
-
-    -- Prevent multi-hit
-    local hitEntities = {}
+    local exploded = false
 
     part.Touched:Connect(function(hit)
-        local character = hit.Parent
-        if character and character:FindFirstChild("Humanoid") then
-            
-            if hitEntities[character] then return end
-            hitEntities[character] = true
+        if exploded then return end
 
-            -- Use the BaseSpell hit logic
-            self:OnHit(hit, damage)
+        -- Only trigger on non-player characters that have a Humanoid
+        local hitCharacter = hit.Parent
+        if not hitCharacter or not hitCharacter:FindFirstChild("Humanoid") then return end
+        if Players:GetPlayerFromCharacter(hitCharacter) then return end
+
+        exploded = true
+
+        -- Freeze the projectile in place
+        local bv = part:FindFirstChildOfClass("BodyVelocity")
+        if bv then bv:Destroy() end
+        part.Anchored = true
+        part.CanCollide = false
+
+        local hitPos = part.Position
+
+        -- Damage every enemy inside the explosion radius
+        for _, obj in ipairs(workspace:GetDescendants()) do
+            if obj:IsA("Humanoid") then
+                local enemyChar = obj.Parent
+                if enemyChar and not Players:GetPlayerFromCharacter(enemyChar) then
+                    local rootPart = enemyChar:FindFirstChild("HumanoidRootPart")
+                    if rootPart and (rootPart.Position - hitPos).Magnitude <= explodeRadius then
+                        self:OnHit(rootPart, damage)
+                    end
+                end
+            end
         end
+
+        -- Balloon to full explosion size
+        local expandTween = TweenService:Create(
+            part,
+            TweenInfo.new(EXPAND_TIME, Enum.EasingStyle.Quad, Enum.EasingDirection.Out),
+            { Size = Vector3.new(explodeSize, explodeSize, explodeSize) }
+        )
+        expandTween:Play()
+
+        -- Once fully expanded, fade out and clean up
+        expandTween.Completed:Connect(function()
+            TweenService:Create(
+                part,
+                TweenInfo.new(FADE_TIME, Enum.EasingStyle.Linear),
+                { Transparency = 1 }
+            ):Play()
+            Debris:AddItem(part, FADE_TIME)
+        end)
     end)
 
+    -- Safety cleanup if the fireball never hits anything
     Debris:AddItem(part, self.DebrisTimer)
 end
 

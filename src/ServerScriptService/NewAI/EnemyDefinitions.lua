@@ -10,8 +10,15 @@ local EnemyDefaults = {
     PreferredDistance = 0,
 }
 
+-- =====================================================================
+-- WAVE UNLOCK REFERENCE
+--   MinWave = 1  → available from the very first wave
+--   MinWave = 3  → first appears on wave 3
+--   (omitting MinWave defaults to 1 in GetWeightedRandom)
+-- =====================================================================
 EnemyDefinitions.Types = {
     {
+        MinWave = 1,        -- always available
         Weight = 50,
         Type = "Melee",
         Name = "Zombie",
@@ -23,6 +30,7 @@ EnemyDefinitions.Types = {
         AttackCooldown = EnemyDefaults.AttackCooldown
     },
     {
+        MinWave = 2,        -- archers join on wave 2
         Weight = 30,
         Type = "Ranged",
         Name = "Skeleton Archer",
@@ -34,9 +42,9 @@ EnemyDefinitions.Types = {
         PreferredDistance = 20,
         AttackRange = 30,
         AttackCooldown = EnemyDefaults.AttackCooldown
-
     },
     {
+        MinWave = 5,        -- necromancer unlocks on wave 4
         Weight = 10,
         Type = "Summoner",
         Name = "Necromancer",
@@ -61,6 +69,7 @@ EnemyDefinitions.Types = {
         }
     },
     {
+        MinWave = 4,        -- bombers unlock on wave 5
         Weight = 15,
         Type = "Bomber",
         Name = "Suicide Bomber",
@@ -72,31 +81,33 @@ EnemyDefinitions.Types = {
         AttackCooldown = 999,
     },
     {
+        MinWave = 10,        -- eggs first appear on wave 3
         Weight = 2,
         Type = "Egg",
         Name = "Egg",
         Speed = 0,
-        Health = 100,
+        Health = 150,
         Damage = 0,
         Armor = 0,
         -- No Model field: the egg Part is created programmatically in EggEnemy
         HatchStats = {
             Name = "Empowered Zombie",
-            Speed = 16,
-            Health = 300,
+            Speed = 24,
+            Health = 500,
             Damage = 40,
-            Armor = 10,
-            ModelScale = 2,
+            Armor = 30,
+            ModelScale = 1.5,
         }
     },
     {
+        MinWave = 7,        -- mage is a late-game threat, unlocks wave 6
         Weight = 8,
         Type = "Mage",
         Name = "Mage",
-        Speed = 8,
-        Health = 120,
-        Damage = 0,
-        Armor = 10,
+        Speed = 16,
+        Health = 300,
+        Damage = 75,
+        Armor = 25,
         Model = ServerStorage.EnemyModels.Mage,
     }
 }
@@ -111,19 +122,29 @@ function EnemyDefinitions.GetByName(name)
     return nil
 end
 
-function EnemyDefinitions.GetWeightedRandom()
+-- Returns a random enemy definition that is unlocked for the given wave.
+-- Enemies with MinWave > currentWave are excluded from the pool entirely.
+function EnemyDefinitions.GetWeightedRandom(currentWave)
+    currentWave = currentWave or 1
+
     local totalWeight = 0
     for _, enemy in ipairs(EnemyDefinitions.Types) do
-        totalWeight += enemy.Weight
+        if currentWave >= (enemy.MinWave or 1) then
+            totalWeight += enemy.Weight
+        end
     end
-    
+
+    if totalWeight == 0 then return nil end
+
     local rand = math.random(1, totalWeight)
-    local currentWeight = 0
-    
+    local runningWeight = 0
+
     for _, enemy in ipairs(EnemyDefinitions.Types) do
-        currentWeight += enemy.Weight
-        if rand <= currentWeight then
-            return enemy
+        if currentWave >= (enemy.MinWave or 1) then
+            runningWeight += enemy.Weight
+            if rand <= runningWeight then
+                return enemy
+            end
         end
     end
 end

@@ -1,5 +1,6 @@
 local Spawner = {}
 
+local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ServerScriptService = game:GetService("ServerScriptService")
 -- local EnemyAI = ServerScriptService.EnemyAI
@@ -14,12 +15,14 @@ local EggEnemy = Modules.Get("EggEnemy")
 local MageEnemy = Modules.Get("MageEnemy")
 local EnemyDefinitions = Modules.Get("EnemyTypes")
 local DificultyManager = Modules.Get("DificultyManager")
+local WaveModule = Modules.Get("WaveModule")
 
 -- ===============================
 -- CONFIGURATION
 -- ===============================
 local SPAWN_INTERVAL = 0.7
 local MAX_ENEMIES = 20
+local MIN_SPAWN_DISTANCE = 5  -- studs; enemies won't spawn closer than this to any player
 
 -- ===============================
 -- PRIVATE STATE
@@ -32,6 +35,16 @@ local spawnerThread = nil
 -- PRIVATE FUNCTIONS
 -- ===============================
 
+local function isTooCloseToPlayers(pos: Vector3): boolean
+	for _, player in ipairs(Players:GetPlayers()) do
+		local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		if root and (root.Position - pos).Magnitude < MIN_SPAWN_DISTANCE then
+			return true
+		end
+	end
+	return false
+end
+
 local function getRandomSpawnPosition()
 	local baseplate = workspace:FindFirstChild("Baseplate") or workspace:FindFirstChild("Base")
 
@@ -42,12 +55,23 @@ local function getRandomSpawnPosition()
 
 	local size = baseplate.Size
 	local position = baseplate.Position
+	local spawnY = position.Y + (size.Y / 2) + 3
 
-	local randomX = position.X + math.random(-size.X/2, size.X/2)
-	local randomZ = position.Z + math.random(-size.Z/2, size.Z/2)
-	local spawnY = position.Y + (size.Y/2) + 3
+	-- Retry up to 10 times to find a position far enough from all players.
+	-- If every attempt fails (very unlikely on a large map), use the last candidate.
+	local candidate
+	for _ = 1, 10 do
+		candidate = Vector3.new(
+			position.X + math.random(-size.X / 2, size.X / 2),
+			spawnY,
+			position.Z + math.random(-size.Z / 2, size.Z / 2)
+		)
+		if not isTooCloseToPlayers(candidate) then
+			break
+		end
+	end
 
-	return Vector3.new(randomX, spawnY, randomZ)
+	return candidate
 end
 
 local function spawnEnemy(enemyData)
@@ -126,7 +150,7 @@ function Spawner.Start()
 			cleanupDeadEnemies()
 
 			if #activeEnemies < MAX_ENEMIES then
-				local enemyData = EnemyDefinitions.GetWeightedRandom()
+				local enemyData = EnemyDefinitions.GetWeightedRandom(WaveModule.Get())
 				-- local scaledEnemyData = DificultyManager.DifficultySetting(enemyData) -- NEED TO IMPLEMENT WAY TO CHANGE DIFF -- INEFICIENT AND SHOULD BE REWORKED FOR EFFICIENCY IF NEEDED
 				local waveScaledEnemyData = DificultyManager.WaveScalling(enemyData) -- INEFICIENT AND SHOULD BE REWORKED FOR EFFICIENCY IF NEEDED
 				local newEnemy = spawnEnemy(waveScaledEnemyData)

@@ -9,7 +9,8 @@ local RISE_HEIGHT = 4
 local FADE_DELAY = 0.35 -- seconds after spawn before fade begins
 local FADE_TIME = 0.55
 
-function DamageIndicator.Show(position: Vector3, damage: number)
+-- color defaults to white (enemy damage); pass a Color3 to override (e.g. red for player damage)
+function DamageIndicator.Show(position: Vector3, damage: number, color: Color3?)
 	local rounded = math.round(damage)
 	if rounded <= 0 then return end
 
@@ -38,7 +39,7 @@ function DamageIndicator.Show(position: Vector3, damage: number)
 	label.Size = UDim2.new(1, 0, 1, 0)
 	label.BackgroundTransparency = 1
 	label.Text = tostring(rounded)
-	label.TextColor3 = Color3.new(1, 1, 1)
+	label.TextColor3 = color or Color3.new(1, 1, 1)
 	label.TextScaled = true
 	label.Font = Enum.Font.GothamBold
 	label.TextStrokeColor3 = Color3.new(0, 0, 0)
