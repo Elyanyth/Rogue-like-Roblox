@@ -28,17 +28,18 @@ function Fireball:OnCast(player, mousePos, _, damage, _)
     local character = player.Character
     local root = character.HumanoidRootPart
 
-    -- WizardCap (or other item) size modifier
+    -- WizardCap (or other item) size modifier — only scales the explosion, not the projectile
+    -- mod.stacks is an array returned by PlayerData.GetItem; index [1] is the actual count
     local modifiers = ItemManager:GetSpellModifiers(player, self.Name)
     local sizeMultiplier = 1
     for _, mod in ipairs(modifiers) do
         if mod.data.SizeMultiplier then
-            sizeMultiplier *= mod.data.SizeMultiplier(mod.stacks)
+            sizeMultiplier *= mod.data.SizeMultiplier(mod.stacks[1])
         end
     end
 
-    local projSize     = PROJECTILE_SIZE  * sizeMultiplier
-    local explodeSize  = EXPLOSION_SIZE   * sizeMultiplier
+    local projSize      = PROJECTILE_SIZE               -- always small regardless of upgrades
+    local explodeSize   = EXPLOSION_SIZE * sizeMultiplier
     local explodeRadius = explodeSize / 2
 
     -- Spawn small projectile
